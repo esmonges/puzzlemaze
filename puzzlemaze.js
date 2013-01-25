@@ -1,7 +1,7 @@
-var g = {};
+var g = { };
 g['boardW'] = 10;
 g['boardH'] = 15;
-g['INTERVAL'] = 1000/60;
+g['INTERVAL'] = 1000 / 60;
 g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur'];
 g['colorMap'] = {
   'evan' : 'green',
@@ -9,6 +9,7 @@ g['colorMap'] = {
   'brandon' : 'red',
   'dillon' : 'yellow',
   'arthur' : 'orange'
+  // TODO: Lol there are more TAs...
 };
 g['mouseDown'] = false;
 
@@ -56,30 +57,69 @@ var loadImgs = function() {
 
 /* Fill in blocks. */
 var initBoard = function() {
-  for (var i = 0; i < g['boardW']; i++) {
-     addBlocks(i, g['boardH']);
+  for (var col = 0; col < g['boardW']; col++) {
+     addBlocks(col, g['boardH']);
   }
 }
 
 /*
  * Drop in blocks in each column.
- * REQUIRES: board has empty cells for the first numBlocks indeces
+ * REQUIRES: Board has empty cells for the first numBlocks indices
  */
 var addBlocks = function(col, numBlocks) {
-  for (var i = 0; i < numBlocks; i++) {
-    g['board'][col][i] = new Block();
+  var banned = [];
+  var choices = [];
+
+  var inBounds = function(col, row) {
+    return 0 <= col && col < g['boardW'] && 0 <= row && row < g['boardH'];
+  }
+
+  var getIcon = function(col, row) {
+    if (g['board'][col][row] === undefined) {
+      return undefined;
+    } else {
+      return g['board'][col][row]['icon'];
+    }
+  }
+
+  for (var row = 0; row < numBlocks; row++) {
+    if (inBounds(col - 2, row) && inBounds(col - 1, row) &&
+        getIcon(col - 2, row) === getIcon(col - 1, row) &&
+        getIcon(col - 1, row) !== undefined) {
+      banned.push(getIcon(col - 1, row));
+    }
+    if (inBounds(col + 2, row) && inBounds(col + 1, row) &&
+        getIcon(col + 2, row) === getIcon(col + 1, row) &&
+        getIcon(col + 1, row) !== undefined) {
+      banned.push(getIcon(col + 1, row));
+    }
+    if (inBounds(col, row - 2) && inBounds(col, row - 1) &&
+        getIcon(col, row - 2) === getIcon(col, row - 1) &&
+        getIcon(col, row - 1) !== undefined) {
+      banned.push(getIcon(col, row - 1));
+    }
+    if (inBounds(col, row + 2) && inBounds(col, row + 1) &&
+        getIcon(col, row + 2) === getIcon(col, row + 1) &&
+        getIcon(col, row + 1) !== undefined) {
+      banned.push(getIcon(col, row + 1));
+    }
+
+    g['icons'].forEach(function(icon) {
+      if (banned.indexOf(icon) === -1) {
+        choices.push(icon)
+      }
+    })
+
+    g['board'][col][row] = new Block(choices);
+    banned = [];
+    choices = [];
   }
 }
 
-/*
- * A Block is an object placed at each cell on the game board.
- *
- * TODO: How do we ensure the game doesn't start with 3 adjacent colors
- *       pregenerate valid boards?
- */
-var Block = function() {
-  this['iconInd'] = Math.floor(Math.random() * g['icons'].length);
-  this['icon'] = g['icons'][this['iconInd']];
+/** A Block is an object placed at each cell on the game board. */
+var Block = function(choices) {
+  var iconIndex = Math.floor(Math.random() * choices.length);
+  this['icon'] = choices[iconIndex];
 }
 
 /* Function to execute at each interval. */
