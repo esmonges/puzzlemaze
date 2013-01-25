@@ -1,6 +1,6 @@
 var g = {};
 g['boardW'] = 10;
-g['boardH'] = 20;
+g['boardH'] = 15;
 g['INTERVAL'] = 1000/60;
 g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur'];
 g['colorMap'] = {
@@ -36,19 +36,19 @@ var Game = function() {
   setInterval(update, g['INTERVAL']);
 }
 
-/** Sprite loader. */
+/* Sprite loader. */
 var loadImgs = function() {
 
 }
 
-/** Fill in blocks. */
+/* Fill in blocks. */
 var initBoard = function() {
   for (var i = 0; i < g['boardW']; i++) {
      addBlocks(i, g['boardH']);
   }
 }
 
-/**
+/*
  * Drop in blocks in each column.
  * REQUIRES: board has empty cells for the first numBlocks indeces
  */
@@ -69,21 +69,24 @@ var Block = function() {
   this['icon'] = g['icons'][this['iconInd']];
 }
 
-/** Function to execute at each interval. */
+/* Function to execute at each interval. */
 var update = function() {
   checkUserIn();
   draw();
 }
 
-/** Check and update based on user mouse input. */
+/* Check and update based on user mouse input. */
 var checkUserIn = function() {
 
 }
 
-/** Update the canvas with the current game state. */
+/* Update the canvas with the current game state. */
 var draw = function() {
-  for (var i = 0; i < g['boardW']; i++) {
-    for (var j = 0; j < g['boardH']; j++) {
+  var i;
+  var j;
+
+  for (i = 0; i < g['boardW']; i++) {
+    for (j = 0; j < g['boardH']; j++) {
       g['ctx'].fillStyle = g['colorMap'][g['board'][i][j]['icon']];
       g['ctx'].fillRect(
         i * g['squareW'],
@@ -92,6 +95,20 @@ var draw = function() {
         g['squareH']
       );
     }
+  }
+
+  for (i = 0; i < g['boardW']; i++){
+    g['ctx'].beginPath();
+    g['ctx'].moveTo(i * g['squareW'], 0);
+    g['ctx'].lineTo(i * g['squareW'], g['canvasH']);
+    g['ctx'].stroke();
+  }
+
+  for (j = 0; j < g['boardH']; j++){
+    g['ctx'].beginPath();
+    g['ctx'].moveTo(0, j * g['squareH']);
+    g['ctx'].lineTo(g['canvasW'], j * g['squareH']);
+    g['ctx'].stroke();
   }
 }
 
