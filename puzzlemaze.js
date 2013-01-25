@@ -2,16 +2,19 @@ var g = { };
 g['boardW'] = 10;
 g['boardH'] = 15;
 g['INTERVAL'] = 1000 / 60;
-g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur'];
+g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris'];
 g['colorMap'] = {
   'evan' : 'green',
   'tomer' : 'blue',
   'brandon' : 'red',
   'dillon' : 'yellow',
-  'arthur' : 'orange'
+  'arthur' : 'orange',
+  'chris' : 'cyan'
   // TODO: Lol there are more TAs...
+  //yea these are the only ones i could remember
 };
 g['mouseDown'] = false;
+g['clicked'] = []; //contains index pairs for which blocks have been clicked
 
 
 var Game = function() {
@@ -47,7 +50,41 @@ var onMouseDown = function(event){
 
 var onMouseUp = function(event){
   /*TODO: Make this do things*/
+  var canvasX = event.pageX - g['canvas'].offsetLeft;
+  var canvasY = event.pageY - g['canvas'].offsetTop;
+
+  var xInd = Math.floor(canvasX/g['squareW']);
+  var yInd = Math.floor(canvasY/g['squareH']);
+
+  if (xInd == g['boardW']){
+    xInd--;
+  }
+  if (yInd == g['boardH']){
+    yInd--;
+  }
+
+  if(g['clicked'].length === 0){
+    g['clicked'].push(new Pair(xInd, yInd));
+  }
+  else{
+    if((Math.abs((g['clicked'][0]['x'] - xInd)) 
+        + Math.abs((g['clicked'][0]['y'] - yInd))) === 1){
+      g['clicked'].push(new Pair(xInd, yInd));
+      swapBlocks();
+      g['clicked'] = [];
+    }
+  }
+
   g['mouseDown'] = false;
+}
+
+var Pair = function(xi, yi){
+  this.x = xi;
+  this.y = yi;
+}
+
+var swapBlocks = function(){
+  //TODO: Swap and check for removal
 }
 
 /* Sprite loader. */
@@ -135,6 +172,8 @@ var checkUserIn = function() {
 
 /* Update the canvas with the current game state. */
 var draw = function() {
+  g['ctx'].fillStyle = 'white';
+  g['ctx'].fillRect(0, 0, g['canvasW'], g['canvasH']);
   drawBoxes();
   drawGrid();
 }
@@ -143,10 +182,18 @@ var draw = function() {
 var drawBoxes = function(){
   var i;
   var j;
+  var k;
 
   for (i = 0; i < g['boardW']; i++) {
     for (j = 0; j < g['boardH']; j++) {
+
       g['ctx'].fillStyle = g['colorMap'][g['board'][i][j]['icon']];
+      for (k = 0; k < g['clicked'].length; k++){
+        if((g['clicked'][k].x === i) && (g['clicked'][k].y === j)){
+          //TODO: clicked indication
+        }
+      }
+      
       g['ctx'].fillRect(
         i * g['squareW'],
         j * g['squareH'],
