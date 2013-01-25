@@ -10,6 +10,7 @@ g['colorMap'] = {
   'dillon' : 'yellow',
   'arthur' : 'orange'
 };
+g['mouseDown'] = false;
 
 
 var Game = function() {
@@ -34,6 +35,18 @@ var Game = function() {
   initBoard();
 
   setInterval(update, g['INTERVAL']);
+
+  g['canvas'].addEventListener('mousedown', onMouseDown, false);
+  g['canvas'].addEventListener('mouseup', onMouseUp, false);
+}
+
+var onMouseDown = function(event){
+  g['mouseDown'] = true;
+}
+
+var onMouseUp = function(event){
+  /*TODO: Make this do things*/
+  g['mouseDown'] = false;
 }
 
 /* Sprite loader. */
@@ -82,6 +95,12 @@ var checkUserIn = function() {
 
 /* Update the canvas with the current game state. */
 var draw = function() {
+  drawBoxes();
+  drawGrid();
+}
+
+/* Draw the boxes the player needs to line up */
+var drawBoxes = function(){
   var i;
   var j;
 
@@ -96,6 +115,12 @@ var draw = function() {
       );
     }
   }
+}
+
+/* Draw a grid to distinguish the boxes */
+var drawGrid = function(){
+  var i;
+  var j;
 
   for (i = 0; i < g['boardW']; i++){
     g['ctx'].beginPath();
@@ -110,6 +135,7 @@ var draw = function() {
     g['ctx'].lineTo(g['canvasW'], j * g['squareH']);
     g['ctx'].stroke();
   }
+
 }
 
 new Game();
