@@ -66,13 +66,15 @@ var onMouseUp = function(event){
   if(g['clicked'].length === 0){
     g['clicked'].push(new Pair(xInd, yInd));
   }
-  else{
-    if((Math.abs((g['clicked'][0]['x'] - xInd)) 
+  if((g['clicked'].length >= 1)
+        && (Math.abs((g['clicked'][0]['x'] - xInd)) 
         + Math.abs((g['clicked'][0]['y'] - yInd))) === 1){
-      g['clicked'].push(new Pair(xInd, yInd));
-      swapBlocks();
-      g['clicked'] = [];
+    g['clicked'].push(new Pair(xInd, yInd));
+    swapBlocks();
     }
+  else{
+    g['clicked'] = [];
+    g['clicked'].push(new Pair(xInd, yInd));
   }
 
   g['mouseDown'] = false;
@@ -84,7 +86,27 @@ var Pair = function(xi, yi){
 }
 
 var swapBlocks = function(){
-  //TODO: Swap and check for removal
+  var x1, y1, x2, y2;
+  if(g['clicked'].length === 2){
+    x1 = g['clicked'][0].x;
+    y1 = g['clicked'][0].y;
+    x2 = g['clicked'][1].x;
+    y2 = g['clicked'][1].y;
+
+    var temp = g['board'][x1][y1];
+    g['board'][x1][y1] = g['board'][x2][y2];
+    g['board'][x2][y2] = temp;
+    //check for matches in each direction on each block
+    if(checkMatches(x1, y1) > 0){
+
+    }
+    if(checkMatches(x2, y2) > 0){
+      
+    }
+  }
+  
+  g['clicked'] = [];
+  
 }
 
 /* Sprite loader. */
@@ -161,13 +183,13 @@ var Block = function(choices) {
 
 /* Function to execute at each interval. */
 var update = function() {
-  checkUserIn();
+  checkMatches();
   draw();
 }
 
 /* Check and update based on user mouse input. */
-var checkUserIn = function() {
-
+var checkMatches = function() {
+  
 }
 
 /* Update the canvas with the current game state. */
@@ -180,26 +202,44 @@ var draw = function() {
 
 /* Draw the boxes the player needs to line up */
 var drawBoxes = function(){
-  var i;
-  var j;
-  var k;
+  var i, j, k;
+  var drawLeft, drawTop, drawWidth, drawHeight;
 
   for (i = 0; i < g['boardW']; i++) {
     for (j = 0; j < g['boardH']; j++) {
 
-      g['ctx'].fillStyle = g['colorMap'][g['board'][i][j]['icon']];
+      drawLeft = i * g['squareW'];
+      drawTop = j * g['squareH'];
+      drawWidth = g['squareW'];
+      drawHeight = g['squareH'];
+
       for (k = 0; k < g['clicked'].length; k++){
         if((g['clicked'][k].x === i) && (g['clicked'][k].y === j)){
-          //TODO: clicked indication
+
+          g['ctx'].fillStyle = '#FF6EC7';
+          g['ctx'].fillRect(
+            drawLeft, 
+            drawTop, 
+            drawWidth, 
+            drawHeight
+            );
+
+          drawLeft = i * g['squareW'] + g['squareW']/4;
+          drawTop = j * g['squareH'] + g['squareH']/4;
+          drawWidth = g['squareW']/2;
+          drawHeight = g['squareH']/2;
         }
       }
-      
+
+      g['ctx'].fillStyle = g['colorMap'][g['board'][i][j]['icon']];
       g['ctx'].fillRect(
-        i * g['squareW'],
-        j * g['squareH'],
-        g['squareW'],
-        g['squareH']
-      );
+        drawLeft,
+        drawTop,
+        drawWidth,
+        drawHeight
+        );
+      
+      
     }
   }
 }
