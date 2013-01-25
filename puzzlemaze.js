@@ -97,16 +97,24 @@ var swapBlocks = function(){
     g['board'][x1][y1] = g['board'][x2][y2];
     g['board'][x2][y2] = temp;
     //check for matches in each direction on each block
-    if(checkMatches(x1, y1) > 0){
-
-    }
-    if(checkMatches(x2, y2) > 0){
-      
-    }
+    nMatch1 = countMatches(x1, y1);
+    nMatch2 = countMatches(x2, y2);
   }
   
   g['clicked'] = [];
   
+}
+
+var countMatches = function(x, y){
+  var horizCount = 0;
+  var vertCount = 0;
+  var curX = x;
+  var curY = y;
+
+  /* count the things
+  while(g['board'][curX][curY].icon === g['board'][x][y]){
+    curX++;
+  }*/
 }
 
 /* Sprite loader. */
