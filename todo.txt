@@ -1,0 +1,10 @@
+main menu with example play
+
+finish swapping, checking for matches, removing and refilling matches
+
+sprites
+
+animations
+
+???
+
