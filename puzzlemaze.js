@@ -15,12 +15,17 @@ g['colorMap'] = {
   // TODO: Lol there are more TAs...
   //yea these are the only ones i could remember
 };
-g['mouseDown'] = false;
-g['clicked'] = []; //contains index pairs for which blocks have been clicked
-g['toRemove'] = []; //contains blocks that will be removed by the update function
-g['removeTimer'] = 0;
-g['displayMessages'] = []; //contains messages to be displayed to user on baoard
 
+/** Whether the mouse is down or not. */
+g['mouseDown'] = false;
+/** Array of pairs of indices representing clicked blocks. */
+g['clicked'] = [];
+/** Array of blocks to be removed. */
+g['toRemove'] = [];
+/** Timer for removal. */
+g['removeTimer'] = 0;
+/** Array of messages to be displayed to user on board. */
+g['displayMessages'] = [];
 
 var Game = function() {
   g['canvas'] = document.getElementById('myCanvas');
@@ -30,17 +35,15 @@ var Game = function() {
   g['squareH'] = Math.round(g['canvasH'] / g['boardH']);
   g['ctx'] = g['canvas'].getContext('2d');
 
-  /*
-   * Board will mimic canvas layout, with origin at left-top, [x][y] corresponds
-   * x indices right of of the origin, and y indices down from the origin.
-   */
+  /* Board will mimic canvas layout, with origin at left-top, [x][y] corresponds
+   * x indices right of of the origin, and y indices down from the origin. */
   g['board'] = new Array(g['boardW']);
   for (var i = 0; i < g['boardW']; i++) {
     g['board'][i] = new Array(g['boardH']);
   }
 
   loadImgs();
-  // g['ctx'].fillRect(50, 150, 50, 100); //test code for canvas
+  // g['ctx'].fillRect(50, 150, 50, 100); // Test code for canvas
   initBoard();
 
   setInterval(update, g['INTERVAL']);
@@ -54,30 +57,28 @@ var onMouseDown = function(event){
 }
 
 var onMouseUp = function(event){
-  /*TODO: Make this do things*/
   var canvasX = event.pageX - g['canvas'].offsetLeft;
   var canvasY = event.pageY - g['canvas'].offsetTop;
 
-  var xInd = Math.floor(canvasX/g['squareW']);
-  var yInd = Math.floor(canvasY/g['squareH']);
+  var xInd = Math.floor(canvasX / g['squareW']);
+  var yInd = Math.floor(canvasY / g['squareH']);
 
-  if (xInd == g['boardW']){
+  if (xInd === g['boardW']) {
     xInd--;
   }
-  if (yInd == g['boardH']){
+  if (yInd === g['boardH']) {
     yInd--;
   }
 
-  if(g['clicked'].length === 0){
+  if (g['clicked'].length === 0) {
     g['clicked'].push(new Pair(xInd, yInd));
   }
-  if((g['clicked'].length >= 1)
-        && (Math.abs((g['clicked'][0]['x'] - xInd)) 
-        + Math.abs((g['clicked'][0]['y'] - yInd))) === 1){
+  if ((g['clicked'].length >= 1) &&
+      (Math.abs((g['clicked'][0]['x'] - xInd))
+       + Math.abs((g['clicked'][0]['y'] - yInd))) === 1) {
     g['clicked'].push(new Pair(xInd, yInd));
     swapBlocks();
-    }
-  else{
+  } else {
     g['clicked'] = [];
     g['clicked'].push(new Pair(xInd, yInd));
   }
@@ -90,52 +91,50 @@ var Pair = function(xi, yi){
   this.y = yi;
 }
 
-var Message = function(message, color){
+var Message = function(message, color) {
   this.message = message;
   this.color = color;
 }
 
 var swapBlocks = function(){
   var x1, y1, x2, y2;
-  if(g['clicked'].length === 2){
+  if (g['clicked'].length === 2) {
     x1 = g['clicked'][0].x;
     y1 = g['clicked'][0].y;
     x2 = g['clicked'][1].x;
     y2 = g['clicked'][1].y;
 
     swap(x1, y1, x2, y2);
-    
-    //check for matches in each direction on each block
+
+    // Check for matches in each direction on each block
     matched1 = countMatches(x1, y1);
     matched2 = countMatches(x2, y2);
 
-    if(!(matched1 || matched2)){
+    if (!(matched1 || matched2)) {
       g['displayMessages'].push(new Message('No Match!', 'red'));
       swap(x1, y1, x2, y2);
-    }
-    else{
+    } else {
       g['removeTimer'] = g['REMOVE_TIME'];
       g['displayMessages'].push(new Message('Match!', 'green'));
     }
   }
-  
+
   g['clicked'] = [];
-  
 }
 
-/* takes two pairs of indeces and swaps their corresponding cells */
-var swap = function(x1, y1, x2, y2){
+/** Takes two pairs of indices and swaps their corresponding cells. */
+var swap = function(x1, y1, x2, y2) {
   var temp = g['board'][x1][y1];
   g['board'][x1][y1] = g['board'][x2][y2];
   g['board'][x2][y2] = temp;
 }
 
-/*
- * checks for matches adjacent to block at position x,y
- * if there are sufficient matches to remove the string of blocks, calls remove.
- * returns true if any blocks were removed.
+/**
+ * Checks for matches adjacent to block at position (x, y)
+ * If there are sufficient matches to remove the string of blocks, calls remove.
+ * Returns true if any blocks were removed, otherwise false.
  */
-var countMatches = function(x, y){
+var countMatches = function(x, y) {
   //counters set to -1 to avoid double counting the current block
   var nLeft = -1;
   var nRight = -1;
@@ -145,44 +144,44 @@ var countMatches = function(x, y){
   var curY = y;
   var valid = false;
 
-  //Count left
-  do{
+  // Count left
+  do {
     nLeft++;
     curX--;
-  } while((curX >= 0) 
-          && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+  } while ((curX >= 0) &&
+           (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
-  //Count right
+  // Count right
   curX = x;
-  do{
+  do {
     nRight++;
     curX++;
   } while ((curX < g['boardW']) 
-          && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+           && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
-  if((nLeft + nRight + 1) >= 3){
+  if ((nLeft + nRight + 1) >= 3) {
     valid = true;
     removeBlocks(x, y, nLeft, nRight, 'h');
   }
 
-  //Count up
+  // Count up
   curX = x;
-  do{
+  do {
     nUp++;
     curY--;
-  } while ((curY >= 0) 
-          && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+  } while ((curY >= 0)
+           && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
-  //Count down
+  // Count down
   curY = y;
 
-  do{
+  do {
     nDown++;
     curY++;
   } while ((curY < g['boardH'])
-          && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+           && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
-  if((nUp + nDown + 1) >= 3){
+  if ((nUp + nDown + 1) >= 3) {
     valid = true;
     removeBlocks(x, y, nUp, nDown, 'v');
   }
@@ -192,30 +191,28 @@ var countMatches = function(x, y){
   //g['toRemove'].forEach(function(e){alert(e.x + " " + e.y);});
 }
 
-/*
- * Pushes indeces of blocks to be removed for main interval to handle
- * takes coord of starting block, number adjacent in first direction and second direction
- * and an option for the direction in which it's checking; 'h' for horizontal, 'v' for vertical
+/**
+ * Pushes indices of blocks to be removed for main interval to handle.
+ * Takes coordinate of starting block, number adjacent in first direction,
+ * number adjacent in second direction, and an option for the direction in which
+ * it's checking; 'h' for horizontal, 'v' for vertical
  */
-var removeBlocks = function(x, y, nD1, nD2, dir){
+var removeBlocks = function(x, y, nD1, nD2, dir) {
   var curCoord = [x, y];
   var dirInd;
   var i;
 
-  if(dir === 'h'){
+  if (dir === 'h') {
     dirInd = 0;
-  }
-  else if(dir === 'v'){
+  } else if (dir === 'v') {
     dirInd = 1;
-  }
-  else{
+  } else {
     console.log('Invalid argument to removeBlocks');
   }
 
-  
-  //tag cells up or left, include the original cell
+  // Tag cells up or left, include the original cell
   curCoord[dirInd]++;
-  for (i = 0; i >= -nD1; i--){
+  for (i = 0; i >= -nD1; i--) {
     curCoord[dirInd]--;
     g['toRemove'].push(new Pair(curCoord[0], curCoord[1]));
   }
@@ -223,18 +220,18 @@ var removeBlocks = function(x, y, nD1, nD2, dir){
   curCoord = [x, y];
 
   //tag cells down or right, don't include original cell
-  for(i = 1; i <= nD2; i++){
+  for (i = 1; i <= nD2; i++) {
     curCoord[dirInd]++;
     g['toRemove'].push(new Pair(curCoord[0], curCoord[1]));
   }
 }
 
-/* Sprite loader. */
+/** Sprite loader. */
 var loadImgs = function() {
 
 }
 
-/* Fill in blocks. */
+/** Fill in blocks. */
 var initBoard = function() {
   for (var col = 0; col < g['boardW']; col++) {
      addBlocks(col, g['boardH']);
@@ -301,29 +298,28 @@ var Block = function(choices) {
   this['icon'] = choices[iconIndex];
 }
 
-/* Function to execute at each interval. */
+/** Function to execute at each interval. */
 var update = function() {
   checkRemove();
   draw();
 }
 
-/* Handle removal timer and refilling board */
+/** Handle removal timer and refilling board. */
 var checkRemove = function() {
-  if(g['removeTimer'] > 0){
+  if (g['removeTimer'] > 0) {
     g['removeTimer']--;
-  }
-  else{
+  } else {
     replaceRemoved();
     g['toRemove'] = [];
   }
 }
 
-/* remove blocks in toRemove and replace them */
-var replaceRemoved = function(){
-  
+/** Remove blocks in toRemove and replace them. */
+var replaceRemoved = function() {
+
 }
 
-/* Update the canvas with the current game state. */
+/** Update the canvas with the current game state. */
 var draw = function() {
   g['ctx'].fillStyle = 'white';
   g['ctx'].fillRect(0, 0, g['canvasW'], g['canvasH']);
@@ -333,7 +329,7 @@ var draw = function() {
   drawMessages();
 }
 
-/* Draw the boxes the player needs to line up */
+/** Draw the boxes the player needs to line up */
 var drawBoxes = function(){
   var i, j, k;
   var drawLeft, drawTop, drawWidth, drawHeight;
@@ -349,53 +345,56 @@ var drawBoxes = function(){
       drawHeight = g['squareH'];
 
       for (k = 0; k < g['clicked'].length; k++){
-        if((g['clicked'][k].x === i) && (g['clicked'][k].y === j)){
-
+        if ((g['clicked'][k].x === i) && (g['clicked'][k].y === j)) {
           g['ctx'].fillStyle = '#FF6EC7';
           g['ctx'].fillRect(
-            drawLeft, 
-            drawTop, 
-            drawWidth, 
+            drawLeft,
+            drawTop,
+            drawWidth,
             drawHeight
-            );
+          );
 
-          drawLeft = i * g['squareW'] + g['squareW']/4;
-          drawTop = j * g['squareH'] + g['squareH']/4;
-          drawWidth = g['squareW']/2;
-          drawHeight = g['squareH']/2;
+          drawLeft = i * g['squareW'] + g['squareW'] / 4;
+          drawTop = j * g['squareH'] + g['squareH'] / 4;
+          drawWidth = g['squareW'] / 2;
+          drawHeight = g['squareH'] / 2;
         }
       }
 
-      for (k = 0; k < g['toRemove'].length; k++){
-        if((g['toRemove'][k].x === i) && (g['toRemove'][k].y === j)){
+      for (k = 0; k < g['toRemove'].length; k++) {
+        if ((g['toRemove'][k].x === i) && (g['toRemove'][k].y === j)) {
           transformed = true;
-          removeFrac = (g['removeTimer']/g['REMOVE_TIME']);
+          removeFrac = (g['removeTimer'] / g['REMOVE_TIME']);
           g['ctx'].save();
-          g['ctx'].translate(drawLeft + g['squareW']/2, drawTop + g['squareH']/2);
-          g['ctx'].rotate((removeFrac * g['N_ROT_DEGREES']) * (Math.PI/180));
+          g['ctx'].translate(
+            drawLeft + g['squareW'] / 2,
+            drawTop + g['squareH'] / 2
+          );
+          g['ctx'].rotate(
+            (removeFrac * g['N_ROT_DEGREES']) * (Math.PI / 180)
+          );
           break;
         }
       }
 
       g['ctx'].fillStyle = g['colorMap'][g['board'][i][j]['icon']];
 
-      if(transformed){
+      if (transformed) {
         g['ctx'].fillRect(
-        (-g['squareW']/2) * removeFrac,
-        (-g['squareH']/2) * removeFrac,
-        drawWidth * removeFrac,
-        drawHeight * removeFrac
+          (-g['squareW']/2) * removeFrac,
+          (-g['squareH']/2) * removeFrac,
+          drawWidth * removeFrac,
+          drawHeight * removeFrac
         );
         g['ctx'].restore();
         transformed = false;
-      }
-      else{
+      } else {
         g['ctx'].fillRect(
           drawLeft,
           drawTop,
           drawWidth,
           drawHeight
-          );
+        );
       }
     }
   }
@@ -422,9 +421,7 @@ var drawGrid = function(){
 
 }
 
-/*
- * draw messages to the user contained in g['displayMessages']
- */
+/** Draw messages to the user contained in g['displayMessages']. */
 var drawMessages = function(){
 
 }
