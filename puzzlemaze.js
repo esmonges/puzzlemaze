@@ -15,6 +15,7 @@ g['colorMap'] = {
 };
 g['mouseDown'] = false;
 g['clicked'] = []; //contains index pairs for which blocks have been clicked
+g['toRemove'] = []; //contains blocks that will be removed by the update function
 
 
 var Game = function() {
@@ -97,24 +98,106 @@ var swapBlocks = function(){
     g['board'][x1][y1] = g['board'][x2][y2];
     g['board'][x2][y2] = temp;
     //check for matches in each direction on each block
-    nMatch1 = countMatches(x1, y1);
-    nMatch2 = countMatches(x2, y2);
+    matched1 = countMatches(x1, y1);
+    matched2 = countMatches(x2, y2);
   }
   
   g['clicked'] = [];
   
 }
 
+/*
+ * checks for matches adjacent to block at position x,y
+ * if there are sufficient matches to remove the string of blocks, calls remove.
+ * returns true if any blocks were removed.
+ */
 var countMatches = function(x, y){
-  var horizCount = 0;
-  var vertCount = 0;
+  //counters set to -1 to avoid double counting the current block
+  var nLeft = -1;
+  var nRight = -1;
+  var nUp = -1;
+  var nDown = -1;
   var curX = x;
   var curY = y;
 
-  /* count the things
-  while(g['board'][curX][curY].icon === g['board'][x][y]){
+  //Count left
+  do{
+    nLeft++;
+    curX--;
+  } while((curX >= 0) 
+          && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+
+  //Count right
+  curX = x;
+  do{
+    nRight++;
     curX++;
-  }*/
+  } while ((curX < g['boardW']) 
+          && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+
+  if((nLeft + nRight + 1) >= 3){
+    removeBlocks(x, y, nLeft, nRight, 'h');
+  }
+
+  //Count up
+  curX = x;
+  do{
+    nUp++;
+    curY--;
+  } while ((curY >= 0) 
+          && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+
+  //Count down
+  curY = y;
+
+  do{
+    nDown++;
+    curY++;
+  } while ((curY < g['boardH'])
+          && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+
+  if((nUp + nDown + 1) >= 3){
+    removeBlocks(x, y, nUp, nDown, 'v');
+  }
+
+  g['toRemove'].forEach(function(e){alert(e.x + " " + e.y);});
+}
+
+/*
+ * Pushes indeces of blocks to be removed for main interval to handle
+ * takes coord of starting block, number adjacent in first direction and second direction
+ * and an option for the direction in which it's checking; 'h' for horizontal, 'v' for vertical
+ */
+var removeBlocks = function(x, y, nD1, nD2, dir){
+  var curCoord = [x, y];
+  var dirInd;
+  var i;
+
+  if(dir === 'h'){
+    dirInd = 0;
+  }
+  else if(dir === 'v'){
+    dirInd = 1;
+  }
+  else{
+    console.log('Invalid argument to removeBlocks');
+  }
+
+  
+  //tag cells up or left, include the original cell
+  curCoord[dirInd]++;
+  for (i = 0; i >= -nD1; i--){
+    curCoord[dirInd]--;
+    g['toRemove'].push(new Pair(curCoord[0], curCoord[1]));
+  }
+
+  curCoord = [x, y];
+
+  //tag cells down or right, don't include original cell
+  for(i = 1; i <= nD2; i++){
+    curCoord[dirInd]++;
+    g['toRemove'].push(new Pair(curCoord[0], curCoord[1]));
+  }
 }
 
 /* Sprite loader. */
