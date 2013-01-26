@@ -1,13 +1,18 @@
 main menu with example play
 
-finish swapping, checking for matches, removing and refilling matches - removeBlocks will push to a tobe removed array so that
-the timer function can remove and animate
+replaceRemoved - need to eliminate the blocks to be removed, shift ones above and to the left in, then refill the corresponding cols
+		May be some double counting issues, so this function needs to be robust against them. may require
+		changes to addblocks to detect when the array is already full
+
+drawMessages - indications to the user if the swap was legal or not, needs animations
 
 sprites
 
 animations - rotation for eliminated blocks
 	*** there will be double counting in the g['toRemove'] array, but a simple search for applying the rotation should
 	*** ignore this. 
+
+
 
 ???
 

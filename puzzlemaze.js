@@ -307,14 +307,20 @@ var update = function() {
   draw();
 }
 
-/* Check and update based on user mouse input. */
+/* Handle removal timer and refilling board */
 var checkRemove = function() {
   if(g['removeTimer'] > 0){
     g['removeTimer']--;
   }
   else{
+    replaceRemoved();
     g['toRemove'] = [];
   }
+}
+
+/* remove blocks in toRemove and replace them */
+var replaceRemoved = function(){
+  
 }
 
 /* Update the canvas with the current game state. */
