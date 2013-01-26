@@ -2,6 +2,8 @@ var g = { };
 g['boardW'] = 10;
 g['boardH'] = 15;
 g['INTERVAL'] = 1000 / 60;
+g['REMOVE_TIME'] = 50;
+g['N_ROT_DEGREES'] = 180;
 g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris'];
 g['colorMap'] = {
   'evan' : 'green',
@@ -16,6 +18,8 @@ g['colorMap'] = {
 g['mouseDown'] = false;
 g['clicked'] = []; //contains index pairs for which blocks have been clicked
 g['toRemove'] = []; //contains blocks that will be removed by the update function
+g['removeTimer'] = 0;
+g['displayMessages'] = []; //contains messages to be displayed to user on baoard
 
 
 var Game = function() {
@@ -86,6 +90,11 @@ var Pair = function(xi, yi){
   this.y = yi;
 }
 
+var Message = function(message, color){
+  this.message = message;
+  this.color = color;
+}
+
 var swapBlocks = function(){
   var x1, y1, x2, y2;
   if(g['clicked'].length === 2){
@@ -94,16 +103,31 @@ var swapBlocks = function(){
     x2 = g['clicked'][1].x;
     y2 = g['clicked'][1].y;
 
-    var temp = g['board'][x1][y1];
-    g['board'][x1][y1] = g['board'][x2][y2];
-    g['board'][x2][y2] = temp;
+    swap(x1, y1, x2, y2);
+    
     //check for matches in each direction on each block
     matched1 = countMatches(x1, y1);
     matched2 = countMatches(x2, y2);
+
+    if(!(matched1 || matched2)){
+      g['displayMessages'].push(new Message('No Match!', 'red'));
+      swap(x1, y1, x2, y2);
+    }
+    else{
+      g['removeTimer'] = g['REMOVE_TIME'];
+      g['displayMessages'].push(new Message('Match!', 'green'));
+    }
   }
   
   g['clicked'] = [];
   
+}
+
+/* takes two pairs of indeces and swaps their corresponding cells */
+var swap = function(x1, y1, x2, y2){
+  var temp = g['board'][x1][y1];
+  g['board'][x1][y1] = g['board'][x2][y2];
+  g['board'][x2][y2] = temp;
 }
 
 /*
@@ -119,6 +143,7 @@ var countMatches = function(x, y){
   var nDown = -1;
   var curX = x;
   var curY = y;
+  var valid = false;
 
   //Count left
   do{
@@ -136,6 +161,7 @@ var countMatches = function(x, y){
           && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
   if((nLeft + nRight + 1) >= 3){
+    valid = true;
     removeBlocks(x, y, nLeft, nRight, 'h');
   }
 
@@ -157,10 +183,13 @@ var countMatches = function(x, y){
           && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
   if((nUp + nDown + 1) >= 3){
+    valid = true;
     removeBlocks(x, y, nUp, nDown, 'v');
   }
 
-  g['toRemove'].forEach(function(e){alert(e.x + " " + e.y);});
+  return valid;
+
+  //g['toRemove'].forEach(function(e){alert(e.x + " " + e.y);});
 }
 
 /*
@@ -274,27 +303,36 @@ var Block = function(choices) {
 
 /* Function to execute at each interval. */
 var update = function() {
-  checkMatches();
+  checkRemove();
   draw();
 }
 
 /* Check and update based on user mouse input. */
-var checkMatches = function() {
-  
+var checkRemove = function() {
+  if(g['removeTimer'] > 0){
+    g['removeTimer']--;
+  }
+  else{
+    g['toRemove'] = [];
+  }
 }
 
 /* Update the canvas with the current game state. */
 var draw = function() {
   g['ctx'].fillStyle = 'white';
   g['ctx'].fillRect(0, 0, g['canvasW'], g['canvasH']);
+
   drawBoxes();
   drawGrid();
+  drawMessages();
 }
 
 /* Draw the boxes the player needs to line up */
 var drawBoxes = function(){
   var i, j, k;
   var drawLeft, drawTop, drawWidth, drawHeight;
+  var transformed = false;
+  var removeFrac;
 
   for (i = 0; i < g['boardW']; i++) {
     for (j = 0; j < g['boardH']; j++) {
@@ -322,15 +360,37 @@ var drawBoxes = function(){
         }
       }
 
+      for (k = 0; k < g['toRemove'].length; k++){
+        if((g['toRemove'][k].x === i) && (g['toRemove'][k].y === j)){
+          transformed = true;
+          removeFrac = (g['removeTimer']/g['REMOVE_TIME']);
+          g['ctx'].save();
+          g['ctx'].translate(drawLeft + g['squareW']/2, drawTop + g['squareH']/2);
+          g['ctx'].rotate((removeFrac * g['N_ROT_DEGREES']) * (Math.PI/180));
+          break;
+        }
+      }
+
       g['ctx'].fillStyle = g['colorMap'][g['board'][i][j]['icon']];
-      g['ctx'].fillRect(
-        drawLeft,
-        drawTop,
-        drawWidth,
-        drawHeight
+
+      if(transformed){
+        g['ctx'].fillRect(
+        (-g['squareW']/2) * removeFrac,
+        (-g['squareH']/2) * removeFrac,
+        drawWidth * removeFrac,
+        drawHeight * removeFrac
         );
-      
-      
+        g['ctx'].restore();
+        transformed = false;
+      }
+      else{
+        g['ctx'].fillRect(
+          drawLeft,
+          drawTop,
+          drawWidth,
+          drawHeight
+          );
+      }
     }
   }
 }
@@ -353,6 +413,13 @@ var drawGrid = function(){
     g['ctx'].lineTo(g['canvasW'], j * g['squareH']);
     g['ctx'].stroke();
   }
+
+}
+
+/*
+ * draw messages to the user contained in g['displayMessages']
+ */
+var drawMessages = function(){
 
 }
 
