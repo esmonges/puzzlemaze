@@ -239,7 +239,7 @@ var initBoard = function() {
 }
 
 /**
- * Drop in blocks in each column.
+ * Drop in numBlocks blocks to specified column.
  * REQUIRES: Board has empty cells for the first numBlocks indices
  */
 var addBlocksToColumn = function(col, numBlocks) {
@@ -259,6 +259,60 @@ var addBlocksToColumn = function(col, numBlocks) {
   }
 
   for (var row = 0; row < numBlocks; row++) {
+    if (inBounds(col - 2, row) && inBounds(col - 1, row) &&
+        getIcon(col - 2, row) === getIcon(col - 1, row) &&
+        getIcon(col - 1, row) !== undefined) {
+      banned.push(getIcon(col - 1, row));
+    }
+    if (inBounds(col + 2, row) && inBounds(col + 1, row) &&
+        getIcon(col + 2, row) === getIcon(col + 1, row) &&
+        getIcon(col + 1, row) !== undefined) {
+      banned.push(getIcon(col + 1, row));
+    }
+    if (inBounds(col, row - 2) && inBounds(col, row - 1) &&
+        getIcon(col, row - 2) === getIcon(col, row - 1) &&
+        getIcon(col, row - 1) !== undefined) {
+      banned.push(getIcon(col, row - 1));
+    }
+    if (inBounds(col, row + 2) && inBounds(col, row + 1) &&
+        getIcon(col, row + 2) === getIcon(col, row + 1) &&
+        getIcon(col, row + 1) !== undefined) {
+      banned.push(getIcon(col, row + 1));
+    }
+
+    g['icons'].forEach(function(icon) {
+      if (banned.indexOf(icon) === -1) {
+        choices.push(icon)
+      }
+    })
+
+    g['board'][col][row] = new Block(choices);
+    banned = [];
+    choices = [];
+  }
+}
+
+/**
+ * Drop in numBlocks blocks to specified column.
+ * REQUIRES: Board has empty cells for the first numBlocks indices
+ */
+var addBlocksToRow = function(row, numBlocks) {
+  var banned = [];
+  var choices = [];
+
+  var inBounds = function(col, row) {
+    return 0 <= col && col < g['boardW'] && 0 <= row && row < g['boardH'];
+  }
+
+  var getIcon = function(col, row) {
+    if (g['board'][col][row] === undefined) {
+      return undefined;
+    } else {
+      return g['board'][col][row]['icon'];
+    }
+  }
+
+  for (var col = 0; col < numBlocks; col++) {
     if (inBounds(col - 2, row) && inBounds(col - 1, row) &&
         getIcon(col - 2, row) === getIcon(col - 1, row) &&
         getIcon(col - 1, row) !== undefined) {
