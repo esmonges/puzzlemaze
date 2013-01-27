@@ -52,11 +52,11 @@ var Game = function() {
   g['canvas'].addEventListener('mouseup', onMouseUp, false);
 }
 
-var onMouseDown = function(event){
+var onMouseDown = function(event) {
   g['mouseDown'] = true;
 }
 
-var onMouseUp = function(event){
+var onMouseUp = function(event) {
   var canvasX = event.pageX - g['canvas'].offsetLeft;
   var canvasY = event.pageY - g['canvas'].offsetTop;
 
@@ -86,7 +86,7 @@ var onMouseUp = function(event){
   g['mouseDown'] = false;
 }
 
-var Pair = function(xi, yi){
+var Pair = function(xi, yi) {
   this.x = xi;
   this.y = yi;
 }
@@ -96,7 +96,7 @@ var Message = function(message, color) {
   this.color = color;
 }
 
-var swapBlocks = function(){
+var swapBlocks = function() {
   var x1, y1, x2, y2;
   if (g['clicked'].length === 2) {
     x1 = g['clicked'][0].x;
@@ -135,7 +135,7 @@ var swap = function(x1, y1, x2, y2) {
  * Returns true if any blocks were removed, otherwise false.
  */
 var countMatches = function(x, y) {
-  //counters set to -1 to avoid double counting the current block
+  // Counters set to -1 to avoid double counting the current block
   var nLeft = -1;
   var nRight = -1;
   var nUp = -1;
@@ -195,7 +195,7 @@ var countMatches = function(x, y) {
  * Pushes indices of blocks to be removed for main interval to handle.
  * Takes coordinate of starting block, number adjacent in first direction,
  * number adjacent in second direction, and an option for the direction in which
- * it's checking; 'h' for horizontal, 'v' for vertical
+ * it's checking; 'h' for horizontal, 'v' for vertical.
  */
 var removeBlocks = function(x, y, nD1, nD2, dir) {
   var curCoord = [x, y];
@@ -219,7 +219,7 @@ var removeBlocks = function(x, y, nD1, nD2, dir) {
 
   curCoord = [x, y];
 
-  //tag cells down or right, don't include original cell
+  // Tag cells down or right, don't include original cell
   for (i = 1; i <= nD2; i++) {
     curCoord[dirInd]++;
     g['toRemove'].push(new Pair(curCoord[0], curCoord[1]));
@@ -234,15 +234,15 @@ var loadImgs = function() {
 /** Fill in blocks. */
 var initBoard = function() {
   for (var col = 0; col < g['boardW']; col++) {
-     addBlocks(col, g['boardH']);
+     addBlocksToColumn(col, g['boardH']);
   }
 }
 
-/*
+/**
  * Drop in blocks in each column.
  * REQUIRES: Board has empty cells for the first numBlocks indices
  */
-var addBlocks = function(col, numBlocks) {
+var addBlocksToColumn = function(col, numBlocks) {
   var banned = [];
   var choices = [];
 
@@ -329,8 +329,8 @@ var draw = function() {
   drawMessages();
 }
 
-/** Draw the boxes the player needs to line up */
-var drawBoxes = function(){
+/** Draw the boxes the player needs to line up. */
+var drawBoxes = function() {
   var i, j, k;
   var drawLeft, drawTop, drawWidth, drawHeight;
   var transformed = false;
@@ -381,8 +381,8 @@ var drawBoxes = function(){
 
       if (transformed) {
         g['ctx'].fillRect(
-          (-g['squareW']/2) * removeFrac,
-          (-g['squareH']/2) * removeFrac,
+          (-g['squareW'] / 2) * removeFrac,
+          (-g['squareH'] / 2) * removeFrac,
           drawWidth * removeFrac,
           drawHeight * removeFrac
         );
@@ -400,7 +400,7 @@ var drawBoxes = function(){
   }
 }
 
-/* Draw a grid to distinguish the boxes */
+/** Draw a grid to distinguish the boxes */
 var drawGrid = function(){
   var i;
   var j;
