@@ -414,22 +414,22 @@ var removeShiftAndReplace = function() {
     blocks = g['toRemove'][i];
     if (isHorizontal(blocks)) {
       var y = blocks[0].y;
-      numBlocks = g['toRemove'].length;
+      numBlocks = blocks.length;
       rightmostCoord = getRightmostCoord(blocks);
 
       // Shift row over, overwriting blocks that were to be removed.
-      for (var x = rightmostCoord; x > (rightmostCoord - numBlocks); x--) {
+      for (var x = rightmostCoord; x >= numBlocks; x--) {
         g['board'][x][y] = g['board'][x - numBlocks][y];
         g['board'][x - numBlocks][y] = undefined;
       }
       addBlocksToRow(y, numBlocks);
     } else {
       var x = blocks[0].x;
-      numBlocks = g['toRemove'].length;
+      numBlocks = blocks.length;
       bottommostCoord = getBottommostCoord(blocks);
 
       // Shift column down, overwriting blocks that were to be removed.
-      for (var y = bottommostCoord; y > (bottommostCoord - numBlocks); y--) {
+      for (var y = bottommostCoord; y >= numBlocks; y--) {
         g['board'][x][y] = g['board'][x][y - numBlocks];
         g['board'][x][y - numBlocks] = undefined;
       }
@@ -451,16 +451,31 @@ var draw = function() {
   drawMessages();
 }
 
+/**
+ * Given an array of arrays, return an array containing the contents of each
+ * array. Does not do a "deep flatten"---only one level.
+ */
+var flatten = function(array) {
+  var result = [];
+  for (var i = 0; i < array.length; i++) {
+    for (var j = 0; j < array[i].length; j++) {
+      result.push(array[i][j]);
+    }
+  }
+
+  return result;
+}
+
 /** Draw the boxes the player needs to line up. */
 var drawBoxes = function() {
   var i, j, k;
   var drawLeft, drawTop, drawWidth, drawHeight;
   var transformed = false;
   var removeFrac;
+  var flattenedToRemove = flatten(g['toRemove']);
 
   for (i = 0; i < g['boardW']; i++) {
     for (j = 0; j < g['boardH']; j++) {
-
       drawLeft = i * g['squareW'];
       drawTop = j * g['squareH'];
       drawWidth = g['squareW'];
@@ -483,8 +498,8 @@ var drawBoxes = function() {
         }
       }
 
-      for (k = 0; k < g['toRemove'].length; k++) {
-        if ((g['toRemove'][k].x === i) && (g['toRemove'][k].y === j)) {
+      for (k = 0; k < flattenedToRemove.length; k++) {
+        if ((flattenedToRemove[k].x === i) && (flattenedToRemove[k].y === j)) {
           transformed = true;
           removeFrac = (g['removeTimer'] / g['REMOVE_TIME']);
           g['ctx'].save();
