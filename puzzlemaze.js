@@ -20,7 +20,7 @@ g['colorMap'] = {
 g['mouseDown'] = false;
 /** Array of pairs of indices representing clicked blocks. */
 g['clicked'] = [];
-/** Array of blocks to be removed. */
+/** Array of arrays of blocks to be removed. */
 g['toRemove'] = [];
 /** Timer for removal. */
 g['removeTimer'] = 0;
@@ -188,7 +188,7 @@ var countMatches = function(x, y) {
 
   return valid;
 
-  //g['toRemove'].forEach(function(e){alert(e.x + " " + e.y);});
+  //g['toRemove'].forEach(function(e) { alert(e.x + " " + e.y); });
 }
 
 /**
@@ -201,6 +201,7 @@ var removeBlocks = function(x, y, nD1, nD2, dir) {
   var curCoord = [x, y];
   var dirInd;
   var i;
+  var blocks = [];
 
   if (dir === 'h') {
     dirInd = 0;
@@ -214,7 +215,7 @@ var removeBlocks = function(x, y, nD1, nD2, dir) {
   curCoord[dirInd]++;
   for (i = 0; i >= -nD1; i--) {
     curCoord[dirInd]--;
-    g['toRemove'].push(new Pair(curCoord[0], curCoord[1]));
+    blocks.push(new Pair(curCoord[0], curCoord[1]));
   }
 
   curCoord = [x, y];
@@ -222,8 +223,10 @@ var removeBlocks = function(x, y, nD1, nD2, dir) {
   // Tag cells down or right, don't include original cell
   for (i = 1; i <= nD2; i++) {
     curCoord[dirInd]++;
-    g['toRemove'].push(new Pair(curCoord[0], curCoord[1]));
+    blocks.push(new Pair(curCoord[0], curCoord[1]));
   }
+
+  g['toRemove'].push(blocks)
 }
 
 /** Sprite loader. */
@@ -363,14 +366,79 @@ var checkRemove = function() {
   if (g['removeTimer'] > 0) {
     g['removeTimer']--;
   } else {
-    replaceRemoved();
+    removeShiftAndReplace();
     g['toRemove'] = [];
   }
 }
 
-/** Remove blocks in toRemove and replace them. */
-var replaceRemoved = function() {
+/** TODO: Documentation. */
+var isHorizontal = function(blocks) {
+  if (blocks.length < 2) {
+    throw new Error;
+  } else {
+    return blocks[0].y === blocks[1].y;
+  }
+}
 
+/** TODO: Documentation. */
+var getRightmostCoord = function(blocks) {
+  var maxX = -1;
+  for (var i = 0; i < blocks.length; i++) {
+    if (blocks[i].x > maxX) {
+      maxX = blocks[i].x;
+    }
+  }
+  return maxX;
+}
+
+/** TODO: Documentation. */
+var getBottommostCoord = function(blocks) {
+  var maxY = -1;
+  for (var i = 0; i < blocks.length; i++) {
+    if (blocks[i].y > maxY) {
+      maxY = blocks[i].y;
+    }
+  }
+  return maxY;
+}
+
+/**
+ * Remove each array of blocks in toRemove, shift the respective row or column
+ * over, then replace the missing blocks.
+ */
+var removeShiftAndReplace = function() {
+  var numBlocks;
+  var blocks;
+
+  for (var i = 0; i < g['toRemove'].length; i++) {
+    blocks = g['toRemove'][i];
+    if (isHorizontal(blocks)) {
+      var y = blocks[0].y;
+      numBlocks = g['toRemove'].length;
+      rightmostCoord = getRightmostCoord(blocks);
+
+      // Shift row over, overwriting blocks that were to be removed.
+      for (var x = rightmostCoord; x > (rightmostCoord - numBlocks); x--) {
+        g['board'][x][y] = g['board'][x - numBlocks][y];
+        g['board'][x - numBlocks][y] = undefined;
+      }
+      addBlocksToRow(y, numBlocks);
+    } else {
+      var x = blocks[0].x;
+      numBlocks = g['toRemove'].length;
+      bottommostCoord = getBottommostCoord(blocks);
+
+      // Shift column down, overwriting blocks that were to be removed.
+      for (var y = bottommostCoord; y > (bottommostCoord - numBlocks); y--) {
+        g['board'][x][y] = g['board'][x][y - numBlocks];
+        g['board'][x][y - numBlocks] = undefined;
+      }
+      addBlocksToColumn(x, numBlocks);
+    }
+  }
+
+  // TODO: Is clearing okay here?
+  g['toRemove'] = [];
 }
 
 /** Update the canvas with the current game state. */
@@ -398,7 +466,7 @@ var drawBoxes = function() {
       drawWidth = g['squareW'];
       drawHeight = g['squareH'];
 
-      for (k = 0; k < g['clicked'].length; k++){
+      for (k = 0; k < g['clicked'].length; k++) {
         if ((g['clicked'][k].x === i) && (g['clicked'][k].y === j)) {
           g['ctx'].fillStyle = '#FF6EC7';
           g['ctx'].fillRect(
@@ -455,18 +523,18 @@ var drawBoxes = function() {
 }
 
 /** Draw a grid to distinguish the boxes */
-var drawGrid = function(){
+var drawGrid = function() {
   var i;
   var j;
 
-  for (i = 0; i < g['boardW']; i++){
+  for (i = 0; i < g['boardW']; i++) {
     g['ctx'].beginPath();
     g['ctx'].moveTo(i * g['squareW'], 0);
     g['ctx'].lineTo(i * g['squareW'], g['canvasH']);
     g['ctx'].stroke();
   }
 
-  for (j = 0; j < g['boardH']; j++){
+  for (j = 0; j < g['boardH']; j++) {
     g['ctx'].beginPath();
     g['ctx'].moveTo(0, j * g['squareH']);
     g['ctx'].lineTo(g['canvasW'], j * g['squareH']);
@@ -476,7 +544,7 @@ var drawGrid = function(){
 }
 
 /** Draw messages to the user contained in g['displayMessages']. */
-var drawMessages = function(){
+var drawMessages = function() {
 
 }
 
