@@ -23,7 +23,7 @@ g['clicked'] = [];
 /** Array of arrays of blocks to be removed. */
 g['toRemove'] = [];
 /** Timer for removal. */
-g['removeTimer'] = 0;
+g['removeTimer'] = [];
 /** Array of messages to be displayed to user on board. */
 g['displayMessages'] = [];
 
@@ -114,7 +114,7 @@ var swapBlocks = function() {
       g['displayMessages'].push(new Message('No Match!', 'red'));
       swap(x1, y1, x2, y2);
     } else {
-      g['removeTimer'] = g['REMOVE_TIME'];
+      //g['removeTimer'] = g['REMOVE_TIME'];//relocated to removeBlocks
       g['displayMessages'].push(new Message('Match!', 'green'));
     }
   }
@@ -225,7 +225,8 @@ var removeBlocks = function(x, y, nD1, nD2, dir) {
     curCoord[dirInd]++;
     blocks.push(new Pair(curCoord[0], curCoord[1]));
   }
-
+  
+  g['removeTimer'].push(g['REMOVE_TIME']);
   g['toRemove'].push(blocks)
 }
 
@@ -363,11 +364,19 @@ var update = function() {
 
 /** Handle removal timer and refilling board. */
 var checkRemove = function() {
-  if (g['removeTimer'] > 0) {
-    g['removeTimer']--;
-  } else {
-    removeShiftAndReplace();
-    g['toRemove'] = [];
+  var i;
+
+  for (i = 0; i < g['removeTimer'].length; i++){
+    if (g['removeTimer'][i] > 0) {
+      g['removeTimer'][i]--;
+    } else {
+      alert(g['removeTimer'].length + " " + g['toRemove'].length);
+      removeShiftAndReplace(i);
+      g['toRemove'][i].splice(i,1);
+      g['removeTimer'].splice(i,1);
+
+
+    }
   }
 }
 
@@ -405,48 +414,48 @@ var getBottommostCoord = function(blocks) {
 /**
  * Remove each array of blocks in toRemove, shift the respective row or column
  * over, then replace the missing blocks.
+ * TODO: OMER: Rewrite to take an index and remove only the blocks in g['toRemove'][index]
  */
-var removeShiftAndReplace = function() {
+var removeShiftAndReplace = function(i) {
   var numBlocks;
   var blocks;
 
-  for (var i = 0; i < g['toRemove'].length; i++) {
-    blocks = g['toRemove'][i];
-    if (isHorizontal(blocks)) {
-      var y = blocks[0].y;
-      numBlocks = blocks.length;
-      rightmostCoord = getRightmostCoord(blocks);
+  blocks = g['toRemove'][i];
+  if (isHorizontal(blocks)) {
+    var y = blocks[0].y;
+    numBlocks = blocks.length;
+    rightmostCoord = getRightmostCoord(blocks);
 
-      // Shift row over, overwriting blocks that were to be removed.
-      for (var x = rightmostCoord; x >= numBlocks; x--) {
-        g['board'][x][y] = g['board'][x - numBlocks][y];
-        g['board'][x - numBlocks][y] = undefined;
-      }
-
-      // Check for new cascading matches.
-      for (x = rightmostCoord; x >= numBlocks; x--) {
-        countMatches(x, y);
-      }
-      addBlocksToRow(y, numBlocks);
-    } else {
-      var x = blocks[0].x;
-      numBlocks = blocks.length;
-      bottommostCoord = getBottommostCoord(blocks);
-
-      // Shift column down, overwriting blocks that were to be removed.
-      for (var y = bottommostCoord; y >= numBlocks; y--) {
-        g['board'][x][y] = g['board'][x][y - numBlocks];
-        g['board'][x][y - numBlocks] = undefined;
-      }
-
-      // Check for new cascading matches.
-      for (y = bottommostCoord; y >= numBlocks; y--) {
-        countMatches(x, y);
-      }
-
-      addBlocksToColumn(x, numBlocks);
+    // Shift row over, overwriting blocks that were to be removed.
+    for (var x = rightmostCoord; x >= numBlocks; x--) {
+      g['board'][x][y] = g['board'][x - numBlocks][y];
+      g['board'][x - numBlocks][y] = undefined;
     }
+    
+    // Check for new cascading matches.
+    for (x = rightmostCoord; x >= numBlocks; x--) {
+      countMatches(x, y);
+    }
+    addBlocksToRow(y, numBlocks);
+  } else {
+    var x = blocks[0].x;
+    numBlocks = blocks.length;
+    bottommostCoord = getBottommostCoord(blocks);
+
+    // Shift column down, overwriting blocks that were to be removed.
+    for (var y = bottommostCoord; y >= numBlocks; y--) {
+      g['board'][x][y] = g['board'][x][y - numBlocks];
+      g['board'][x][y - numBlocks] = undefined;
+    }
+
+    // Check for new cascading matches.
+    for (y = bottommostCoord; y >= numBlocks; y--) {
+      countMatches(x, y);
+    }
+
+    addBlocksToColumn(x, numBlocks);
   }
+  
 }
 
 /** Update the canvas with the current game state. */
@@ -476,11 +485,11 @@ var flatten = function(array) {
 
 /** Draw the boxes the player needs to line up. */
 var drawBoxes = function() {
-  var i, j, k;
+  var i, j, k, l;
   var drawLeft, drawTop, drawWidth, drawHeight;
   var transformed = false;
   var removeFrac;
-  var flattenedToRemove = flatten(g['toRemove']);
+  //var flattenedToRemove = flatten(g['toRemove']);//removed for simultaneous animation
 
   for (i = 0; i < g['boardW']; i++) {
     for (j = 0; j < g['boardH']; j++) {
@@ -497,7 +506,7 @@ var drawBoxes = function() {
             drawTop,
             drawWidth,
             drawHeight
-          );
+            );
 
           drawLeft = i * g['squareW'] + g['squareW'] / 4;
           drawTop = j * g['squareH'] + g['squareH'] / 4;
@@ -506,19 +515,21 @@ var drawBoxes = function() {
         }
       }
 
-      for (k = 0; k < flattenedToRemove.length; k++) {
-        if ((flattenedToRemove[k].x === i) && (flattenedToRemove[k].y === j)) {
-          transformed = true;
-          removeFrac = (g['removeTimer'] / g['REMOVE_TIME']);
-          g['ctx'].save();
-          g['ctx'].translate(
-            drawLeft + g['squareW'] / 2,
-            drawTop + g['squareH'] / 2
-          );
-          g['ctx'].rotate(
-            (removeFrac * g['N_ROT_DEGREES']) * (Math.PI / 180)
-          );
-          break;
+      for (k = 0; k < g['toRemove'].length; k++) {
+        for (l = 0; l < g['toRemove'][k].length; l++){
+          if ((g['toRemove'][k][l].x === i) && (g['toRemove'][k][l].y === j)) {
+            transformed = true;
+            removeFrac = (g['removeTimer'][k] / g['REMOVE_TIME']);
+            g['ctx'].save();
+            g['ctx'].translate(
+              drawLeft + g['squareW'] / 2,
+              drawTop + g['squareH'] / 2
+              );
+            g['ctx'].rotate(
+              (removeFrac * g['N_ROT_DEGREES']) * (Math.PI / 180)
+              );
+            break;
+          }
         }
       }
 
@@ -530,7 +541,7 @@ var drawBoxes = function() {
           (-g['squareH'] / 2) * removeFrac,
           drawWidth * removeFrac,
           drawHeight * removeFrac
-        );
+          );
         g['ctx'].restore();
         transformed = false;
       } else {
@@ -539,7 +550,7 @@ var drawBoxes = function() {
           drawTop,
           drawWidth,
           drawHeight
-        );
+          );
       }
     }
   }
