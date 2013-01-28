@@ -149,7 +149,7 @@ var countMatches = function(x, y) {
     nLeft++;
     curX--;
   } while ((curX >= 0) &&
-           (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+           (g['board'][curX][curY] !== undefined && g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
   // Count right
   curX = x;
@@ -157,7 +157,7 @@ var countMatches = function(x, y) {
     nRight++;
     curX++;
   } while ((curX < g['boardW']) 
-           && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+           && (g['board'][curX][curY] !== undefined && g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
   if ((nLeft + nRight + 1) >= 3) {
     valid = true;
@@ -170,7 +170,7 @@ var countMatches = function(x, y) {
     nUp++;
     curY--;
   } while ((curY >= 0)
-           && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+           && (g['board'][curX][curY] !== undefined && g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
   // Count down
   curY = y;
@@ -179,7 +179,7 @@ var countMatches = function(x, y) {
     nDown++;
     curY++;
   } while ((curY < g['boardH'])
-           && (g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
+           && (g['board'][curX][curY] !== undefined && g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
   if ((nUp + nDown + 1) >= 3) {
     valid = true;
@@ -422,6 +422,11 @@ var removeShiftAndReplace = function() {
         g['board'][x][y] = g['board'][x - numBlocks][y];
         g['board'][x - numBlocks][y] = undefined;
       }
+
+      // Check for new cascading matches.
+      for (x = rightmostCoord; x >= numBlocks; x--) {
+        countMatches(x, y);
+      }
       addBlocksToRow(y, numBlocks);
     } else {
       var x = blocks[0].x;
@@ -433,12 +438,15 @@ var removeShiftAndReplace = function() {
         g['board'][x][y] = g['board'][x][y - numBlocks];
         g['board'][x][y - numBlocks] = undefined;
       }
+
+      // Check for new cascading matches.
+      for (y = bottommostCoord; y >= numBlocks; y--) {
+        countMatches(x, y);
+      }
+
       addBlocksToColumn(x, numBlocks);
     }
   }
-
-  // TODO: Is clearing okay here?
-  g['toRemove'] = [];
 }
 
 /** Update the canvas with the current game state. */
