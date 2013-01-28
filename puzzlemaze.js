@@ -143,6 +143,7 @@ var countMatches = function(x, y) {
   var curX = x;
   var curY = y;
   var valid = false;
+  var vAndH = false;
 
   // Count left
   do {
@@ -161,7 +162,8 @@ var countMatches = function(x, y) {
 
   if ((nLeft + nRight + 1) >= 3) {
     valid = true;
-    removeBlocks(x, y, nLeft, nRight, 'h');
+    vAndH = true;
+    removeBlocks(x, y, nLeft, nRight, 'h', false);
   }
 
   // Count up
@@ -183,7 +185,7 @@ var countMatches = function(x, y) {
 
   if ((nUp + nDown + 1) >= 3) {
     valid = true;
-    removeBlocks(x, y, nUp, nDown, 'v');
+    removeBlocks(x, y, nUp, nDown, 'v', vAndH);
   }
 
   return valid;
@@ -197,7 +199,7 @@ var countMatches = function(x, y) {
  * number adjacent in second direction, and an option for the direction in which
  * it's checking; 'h' for horizontal, 'v' for vertical.
  */
-var removeBlocks = function(x, y, nD1, nD2, dir) {
+var removeBlocks = function(x, y, nD1, nD2, dir, doubleCount) {
   var curCoord = [x, y];
   var dirInd;
   var i;
@@ -211,8 +213,12 @@ var removeBlocks = function(x, y, nD1, nD2, dir) {
     console.log('Invalid argument to removeBlocks');
   }
 
-  // Tag cells up or left, include the original cell
-  curCoord[dirInd]++;
+  // Tag cells up or left, include the original cell if we are not doubleCounting
+  if(!doubleCount){
+    curCoord[dirInd]++;
+  } else{
+    nD1--;
+  }
   for (i = 0; i >= -nD1; i--) {
     curCoord[dirInd]--;
     blocks.push(new Pair(curCoord[0], curCoord[1]));
