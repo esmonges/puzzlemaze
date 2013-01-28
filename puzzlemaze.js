@@ -289,6 +289,17 @@ var addBlocksToColumn = function(col, numBlocks) {
         getIcon(col, row + 1) !== undefined) {
       banned.push(getIcon(col, row + 1));
     }
+    if (inBounds(col - 1, row) && inBounds(col + 1, row) &&
+        getIcon(col - 1, row) === getIcon(col + 1, row) &&
+        getIcon(col - 1, row) !== undefined) {
+      banned.push(getIcon(col - 1, row));
+    }
+    if (inBounds(col, row - 1) && inBounds(col, row + 1) &&
+        getIcon(col, row - 1) === getIcon(col, row + 1) &&
+        getIcon(col, row - 1) !== undefined) {
+      banned.push(getIcon(col, row - 1));
+    }
+
 
     g['icons'].forEach(function(icon) {
       if (banned.indexOf(icon) === -1) {
@@ -373,7 +384,7 @@ var checkRemove = function() {
   var i;
   var done = [];
 
-  for (i = 0; i < g['removeTimer'].length; i++){
+  for (i = 0; i < g['removeTimer'].length; i++) {
     if (g['removeTimer'][i] > 0) {
       g['removeTimer'][i]--;
     } else {
@@ -381,8 +392,8 @@ var checkRemove = function() {
       done.push(i);
     }
   }
-  if(done.length > 0)
-alert(g['removeTimer'].length + ' ' + g['toRemove'].length);
+  if (done.length > 0)
+    alert(g['removeTimer'].length + ' ' + g['toRemove'].length);
 
   for (i = 0; i < done.length; i++){
     g['removeTimer'].splice(done[i], 1);
@@ -441,7 +452,7 @@ var removeShiftAndReplace = function(i) {
       g['board'][x][y] = g['board'][x - numBlocks][y];
       g['board'][x - numBlocks][y] = undefined;
     }
-    
+
     // Check for new cascading matches.
     for (x = rightmostCoord; x >= numBlocks; x--) {
       countMatches(x, y);
