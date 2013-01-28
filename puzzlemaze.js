@@ -225,7 +225,7 @@ var removeBlocks = function(x, y, nD1, nD2, dir) {
     curCoord[dirInd]++;
     blocks.push(new Pair(curCoord[0], curCoord[1]));
   }
-  
+
   g['removeTimer'].push(g['REMOVE_TIME']);
   g['toRemove'].push(blocks)
 }
@@ -365,18 +365,22 @@ var update = function() {
 /** Handle removal timer and refilling board. */
 var checkRemove = function() {
   var i;
+  var done = [];
 
   for (i = 0; i < g['removeTimer'].length; i++){
     if (g['removeTimer'][i] > 0) {
       g['removeTimer'][i]--;
     } else {
-      alert(g['removeTimer'].length + " " + g['toRemove'].length);
       removeShiftAndReplace(i);
-      g['toRemove'][i].splice(i,1);
-      g['removeTimer'].splice(i,1);
-
-
+      done.push(i);
     }
+  }
+  if(done.length > 0)
+alert(g['removeTimer'].length + ' ' + g['toRemove'].length);
+
+  for (i = 0; i < done.length; i++){
+    g['removeTimer'].splice(done[i], 1);
+    g['toRemove'].splice(done[i], 1);
   }
 }
 
