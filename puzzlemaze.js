@@ -31,8 +31,6 @@ g['displayMessages'] = [];
 /** Map of images */
 g['images'] = [];
 
-
-
 var Game = function() {
   g['canvas'] = document.getElementById('myCanvas');
   g['canvasW'] = g['canvas'].width;
@@ -102,26 +100,50 @@ var Message = function(message, color) {
   this.color = color;
 }
 
+var isZZZ = function(x, y) {
+  return x >= g['boardW'] - 2 && y >= g['boardH'] - 2;
+}
+
+var isAdjacentToZZZ = function(x, y) {
+  return (g[x][y]['icon'] === 'kosbie') &&
+         ((x === g['boardW'] - 3 && y === g['boardH'] - 3) ||
+          (x === g['boardW'] - 3 && y === g['boardH'] - 2) ||
+          (x === g['boardW'] - 3 && y === g['boardH'] - 1) ||
+          (x === g['boardW'] - 2 && y === g['boardH'] - 3) ||
+          (x === g['boardW'] - 1 && y === g['boardH'] - 3));
+}
+
 var swapBlocks = function() {
   var x1, y1, x2, y2;
+
   if (g['clicked'].length === 2) {
-    x1 = g['clicked'][0].x;
-    y1 = g['clicked'][0].y;
-    x2 = g['clicked'][1].x;
-    y2 = g['clicked'][1].y;
-
-    swap(x1, y1, x2, y2);
-
-    // Check for matches in each direction on each block
-    matched1 = countMatches(x1, y1);
-    matched2 = countMatches(x2, y2);
-
-    if (!(matched1 || matched2)) {
-      g['displayMessages'].push(new Message('No Match!', 'red'));
-      swap(x1, y1, x2, y2);
+    if ((isZZZ(x1, y1) && isKosbieAndAdjacentToZZZ(x2, y2)) ||
+        (isZZZ(x2, y2) && isKosbieAndAdjacentToZZZ(x1, y1))) {
+      // TODO: YOU WIN!
+    } else if (isZZZ(x1, y1) || isZZZ(x2, y2)) {
+      // Can't swap with Zs
+      if (x1 >= g['boardW'] - 2 && y1 >= g['boardH'] - 2) {
+        g['clicked'] = [];
+      }
     } else {
-      //g['removeTimer'] = g['REMOVE_TIME'];//relocated to removeBlocks
-      g['displayMessages'].push(new Message('Match!', 'green'));
+      x1 = g['clicked'][0].x;
+      y1 = g['clicked'][0].y;
+      x2 = g['clicked'][1].x;
+      y2 = g['clicked'][1].y;
+
+      swap(x1, y1, x2, y2);
+
+      // Check for matches in each direction on each block
+      matched1 = countMatches(x1, y1);
+      matched2 = countMatches(x2, y2);
+
+      if (!(matched1 || matched2)) {
+        g['displayMessages'].push(new Message('No Match!', 'red'));
+        swap(x1, y1, x2, y2);
+      } else {
+        //g['removeTimer'] = g['REMOVE_TIME'];//relocated to removeBlocks
+        g['displayMessages'].push(new Message('Match!', 'green'));
+      }
     }
   }
 
@@ -182,7 +204,6 @@ var countMatches = function(x, y) {
 
   // Count down
   curY = y;
-
   do {
     nDown++;
     curY++;
@@ -220,11 +241,12 @@ var removeBlocks = function(x, y, nD1, nD2, dir, doubleCount) {
   }
 
   // Tag cells up or left, include the original cell if we are not doubleCounting
-  if(!doubleCount){
+  if (!doubleCount) {
     curCoord[dirInd]++;
-  } else{
+  } else {
     nD1--;
   }
+
   for (i = 0; i >= -nD1; i--) {
     curCoord[dirInd]--;
     blocks.push(new Pair(curCoord[0], curCoord[1]));
@@ -239,7 +261,8 @@ var removeBlocks = function(x, y, nD1, nD2, dir, doubleCount) {
   }
 
   g['removeTimer'].push(g['REMOVE_TIME']);
-  g['toRemove'].push(blocks)
+  console.log(blocks);
+  g['toRemove'].push(blocks);
 }
 
 /** Sprite loader. */
@@ -258,6 +281,11 @@ var loadImgs = function() {
   kosbie.src = "koz.jpg";
   var tomer = new Image();
   tomer.src = "tomer.jpg";
+
+  var goal = new Image();
+  goal.src = "tomer.jpg"; // TODOOO
+  // TODO: Goal image
+
   g['images'] = {
     'arthur': arthur,
     'brandon': brandon,
@@ -265,7 +293,8 @@ var loadImgs = function() {
     'dillon': dillon,
     'evan': evan,
     'kosbie': kosbie,
-    'tomer': tomer
+    'tomer': tomer,
+    'goal': goal
   }
 }
 
@@ -276,6 +305,12 @@ var initBoard = function() {
   }
   // Force the top-left to start as Kosbie
   g['board'][0][0] = new Block(['kosbie']);
+  // Force the bottom-right corner to be Zs
+  // TODO: Disallow swapping with Zs
+  g['board'][g['boardW'] - 2][g['boardH'] - 2] = new Block(['goal']);
+  g['board'][g['boardW'] - 2][g['boardH'] - 1] = new Block(['goal']);
+  g['board'][g['boardW'] - 1][g['boardH'] - 2] = new Block(['goal']);
+  g['board'][g['boardW'] - 1][g['boardH'] - 1] = new Block(['goal']);
 }
 
 /**
@@ -287,7 +322,8 @@ var addBlocksToColumn = function(col, numBlocks) {
   var choices = [];
 
   var inBounds = function(col, row) {
-    return 0 <= col && col < g['boardW'] && 0 <= row && row < g['boardH'];
+    return 0 <= col && col < g['boardW'] &&
+           0 <= row && row < g['boardH'];
   }
 
   var getIcon = function(col, row) {
@@ -299,31 +335,37 @@ var addBlocksToColumn = function(col, numBlocks) {
   }
 
   for (var row = 0; row < numBlocks; row++) {
+    // Check left
     if (inBounds(col - 2, row) && inBounds(col - 1, row) &&
         getIcon(col - 2, row) === getIcon(col - 1, row) &&
         getIcon(col - 1, row) !== undefined) {
       banned.push(getIcon(col - 1, row));
     }
+    // Check right
     if (inBounds(col + 2, row) && inBounds(col + 1, row) &&
         getIcon(col + 2, row) === getIcon(col + 1, row) &&
         getIcon(col + 1, row) !== undefined) {
       banned.push(getIcon(col + 1, row));
     }
+    // Check up
     if (inBounds(col, row - 2) && inBounds(col, row - 1) &&
         getIcon(col, row - 2) === getIcon(col, row - 1) &&
         getIcon(col, row - 1) !== undefined) {
       banned.push(getIcon(col, row - 1));
     }
+    // Check down
     if (inBounds(col, row + 2) && inBounds(col, row + 1) &&
         getIcon(col, row + 2) === getIcon(col, row + 1) &&
         getIcon(col, row + 1) !== undefined) {
       banned.push(getIcon(col, row + 1));
     }
+    // Check horizontal sandwich
     if (inBounds(col - 1, row) && inBounds(col + 1, row) &&
         getIcon(col - 1, row) === getIcon(col + 1, row) &&
         getIcon(col - 1, row) !== undefined) {
       banned.push(getIcon(col - 1, row));
     }
+    // Check vertical sandwich
     if (inBounds(col, row - 1) && inBounds(col, row + 1) &&
         getIcon(col, row - 1) === getIcon(col, row + 1) &&
         getIcon(col, row - 1) !== undefined) {
@@ -415,21 +457,16 @@ var checkRemove = function() {
   var i;
   var done = [];
 
-  for (i = 0; i < g['removeTimer'].length; i++) {
-    if (g['removeTimer'][i] > 0) {
-      g['removeTimer'][i]--;
-    } else {
-      removeShiftAndReplace(i);
-      done.push(i);
+  while (g['removeTimer'].length > 0) {
+    for (var i = 0; i < g['removeTimer'].length; i++) {
+      if (g['removeTimer'][i] > 0) {
+        g['removeTimer'][i]--;
+      } else {
+        removeShiftAndReplace(i);
+        g['removeTimer'].splice(i, 1);
+        g['toRemove'].splice(i, 1);
+      }
     }
-  }
-  if (done.length > 0) {
-    //alert(g['removeTimer'].length + ' ' + g['toRemove'].length);
-  }
-
-  for (i = 0; i < done.length; i++){
-    g['removeTimer'].splice(done[i], 1);
-    g['toRemove'].splice(done[i], 1);
   }
 }
 
@@ -489,6 +526,7 @@ var removeShiftAndReplace = function(i) {
     for (x = rightmostCoord; x >= numBlocks; x--) {
       countMatches(x, y);
     }
+
     addBlocksToRow(y, numBlocks);
   } else {
     var x = blocks[0].x;
@@ -508,7 +546,6 @@ var removeShiftAndReplace = function(i) {
 
     addBlocksToColumn(x, numBlocks);
   }
-  
 }
 
 /** Update the canvas with the current game state. */
@@ -571,7 +608,7 @@ var drawBoxes = function() {
       }
 
       for (k = 0; k < g['toRemove'].length; k++) {
-        for (l = 0; l < g['toRemove'][k].length; l++){
+        for (l = 0; l < g['toRemove'][k].length; l++) {
           if ((g['toRemove'][k][l].x === i) && (g['toRemove'][k][l].y === j)) {
             transformed = true;
             removeFrac = (g['removeTimer'][k] / g['REMOVE_TIME']);
@@ -615,20 +652,18 @@ var drawBoxes = function() {
           drawWidth,
           drawHeight
         );
-        if(!clicked){
+        if (!clicked) {
           g['ctx'].drawImage(
-          g['images'][g['board'][i][j]['icon']],
-          drawLeft + (g['squareW'] / 6),
-          drawTop + (g['squareH'] / 6),
-          (2 * drawWidth) / 3,
-          (2 * drawHeight) / 3
+            g['images'][g['board'][i][j]['icon']],
+            drawLeft + (g['squareW'] / 6),
+            drawTop + (g['squareH'] / 6),
+            (2 * drawWidth) / 3,
+            (2 * drawHeight) / 3
           );
-        }else{
+        } else {
           clicked = false;
         }
       }
-
-      
     }
   }
 }
