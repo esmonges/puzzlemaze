@@ -3,6 +3,7 @@ g['boardW'] = 8;
 g['boardH'] = 12;
 g['INTERVAL'] = 1000 / 60;
 g['REMOVE_TIME'] = 50;
+g['timer'] = 0;
 g['N_ROT_DEGREES'] = 180;
 // TODO: Add Liz?
 g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris', 'kosbie'];
@@ -185,7 +186,7 @@ var countMatches = function(x, y) {
   do {
     nRight++;
     curX++;
-  } while ((curX < g['boardW']) 
+  } while ((curX < g['boardW'])
            && (g['board'][curX][curY] !== undefined && g['board'][curX][curY]['icon'] === g['board'][x][y]['icon']));
 
   if ((nLeft + nRight + 1) >= 3) {
@@ -277,10 +278,18 @@ var loadImgs = function() {
   dillon.src = "dillon.jpg";
   var evan = new Image();
   evan.src = "evan.jpg";
-  var kosbie = new Image();
-  kosbie.src = "koz.jpg";
   var tomer = new Image();
   tomer.src = "tomer.jpg";
+
+  var kosbie0 = new Image();
+  kosbie0.src = "kosbie0.png";
+  var kosbie1 = new Image();
+  kosbie1.src = "kosbie1.png";
+  var kosbie2 = new Image();
+  kosbie2.src = "kosbie2.png";
+  var kosbie3 = new Image();
+  kosbie3.src = "kosbie3.png";
+  g['kosbies'] = [kosbie0, kosbie1, kosbie2, kosbie3];
 
   var goal = new Image();
   goal.src = "tomer.jpg"; // TODOOO
@@ -292,7 +301,6 @@ var loadImgs = function() {
     'chris': chris,
     'dillon': dillon,
     'evan': evan,
-    'kosbie': kosbie,
     'tomer': tomer,
     'goal': goal
   }
@@ -450,13 +458,11 @@ var Block = function(choices) {
 var update = function() {
   checkRemove();
   draw();
+  g['timer']++;
 }
 
 /** Handle removal timer and refilling board. */
 var checkRemove = function() {
-  var i;
-  var done = [];
-
   while (g['removeTimer'].length > 0) {
     for (var i = 0; i < g['removeTimer'].length; i++) {
       if (g['removeTimer'][i] > 0) {
@@ -580,10 +586,18 @@ var drawBoxes = function() {
   var transformed = false;
   var clicked = false;
   var removeFrac;
+  var image;
   //var flattenedToRemove = flatten(g['toRemove']);//removed for simultaneous animation
 
   for (i = 0; i < g['boardW']; i++) {
     for (j = 0; j < g['boardH']; j++) {
+      if (g['board'][i][j]['icon'] === 'kosbie') {
+        image = g['kosbies'][Math.floor(g['timer'] / 15) % 4];
+      } else {
+        image = g['images'][g['board'][i][j]['icon']];
+      }
+
+
       drawLeft = i * g['squareW'];
       drawTop = j * g['squareH'];
       drawWidth = g['squareW'];
@@ -636,11 +650,11 @@ var drawBoxes = function() {
         );
 
         g['ctx'].drawImage(
-        g['images'][g['board'][i][j]['icon']],
-        ((-g['squareW'] / 2) + (g['squareW'] / 6)) * removeFrac,
-        ((-g['squareH'] / 2) + (g['squareH'] / 6)) * removeFrac,
-        ((2 * drawWidth) / 3) * removeFrac,
-        ((2 * drawHeight) / 3) * removeFrac
+          image,
+          ((-g['squareW'] / 2) + (g['squareW'] / 6)) * removeFrac,
+          ((-g['squareH'] / 2) + (g['squareH'] / 6)) * removeFrac,
+          ((2 * drawWidth) / 3) * removeFrac,
+          ((2 * drawHeight) / 3) * removeFrac
         );
 
         g['ctx'].restore();
@@ -654,7 +668,7 @@ var drawBoxes = function() {
         );
         if (!clicked) {
           g['ctx'].drawImage(
-            g['images'][g['board'][i][j]['icon']],
+            image,
             drawLeft + (g['squareW'] / 6),
             drawTop + (g['squareH'] / 6),
             (2 * drawWidth) / 3,
