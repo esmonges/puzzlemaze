@@ -32,6 +32,9 @@ g['displayMessages'] = [];
 /** Map of images */
 g['images'] = [];
 
+g['bed'] = new Image();
+g['bed'].src = "cartoon-bed.gif"; // nezta.com
+
 var Game = function() {
   g['canvas'] = document.getElementById('myCanvas');
   g['canvasW'] = g['canvas'].width;
@@ -558,10 +561,16 @@ var removeShiftAndReplace = function(i) {
 var draw = function() {
   g['ctx'].fillStyle = 'white';
   g['ctx'].fillRect(0, 0, g['canvasW'], g['canvasH']);
-
   drawBoxes();
   drawGrid();
   drawMessages();
+  g['ctx'].drawImage(
+    g['bed'],
+    g['canvasW'] - (2 * g['squareW']),
+    g['canvasH'] - (2 * g['squareH']),
+    2 * g['squareW'],
+    2 * g['squareH']
+  );
 }
 
 /**
