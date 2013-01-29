@@ -5,18 +5,16 @@ g['INTERVAL'] = 1000 / 60;
 g['REMOVE_TIME'] = 50;
 g['timer'] = 0;
 g['N_ROT_DEGREES'] = 180;
-// TODO: Add Liz?
-g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris', 'kosbie'];
+g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris', 'liz', 'kosbie'];
 g['colorMap'] = {
   'evan' : 'green',
   'tomer' : 'blue',
-  'brandon' : 'red',
+  'brandon' : 'pink',
   'dillon' : 'yellow',
   'arthur' : 'orange',
   'chris' : 'cyan',
+  'liz' : 'red',
   'kosbie' : 'black'
-  // TODO: Lol there are more TAs...
-  //yea these are the only ones i could remember
 };
 
 /** Whether the mouse is down or not. */
@@ -281,6 +279,8 @@ var loadImgs = function() {
   dillon.src = "dillon.jpg";
   var evan = new Image();
   evan.src = "evan.jpg";
+  var liz = new Image();
+  liz.src = "liz.jpg";
   var tomer = new Image();
   tomer.src = "tomer.jpg";
 
@@ -294,9 +294,9 @@ var loadImgs = function() {
   kosbie3.src = "kosbie3.png";
   g['kosbies'] = [kosbie0, kosbie1, kosbie2, kosbie3];
 
+  // Just a filler image; bed goes over this.
   var goal = new Image();
-  goal.src = "tomer.jpg"; // TODOOO
-  // TODO: Goal image
+  goal.src = "tomer.jpg";
 
   g['images'] = {
     'arthur': arthur,
@@ -304,6 +304,7 @@ var loadImgs = function() {
     'chris': chris,
     'dillon': dillon,
     'evan': evan,
+    'liz': liz,
     'tomer': tomer,
     'goal': goal
   }
@@ -318,6 +319,7 @@ var initBoard = function() {
   g['board'][0][0] = new Block(['kosbie']);
   // Force the bottom-right corner to be Zs
   // TODO: Disallow swapping with Zs
+  // /*
   g['board'][g['boardW'] - 2][g['boardH'] - 2] = new Block(['goal']);
   g['board'][g['boardW'] - 2][g['boardH'] - 1] = new Block(['goal']);
   g['board'][g['boardW'] - 1][g['boardH'] - 2] = new Block(['goal']);
