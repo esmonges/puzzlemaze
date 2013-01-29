@@ -28,30 +28,10 @@ g['toRemove'] = [];
 g['removeTimer'] = [];
 /** Array of messages to be displayed to user on board. */
 g['displayMessages'] = [];
+/** Map of images */
+g['images'] = [];
 
-var arthur = new Image();
-arthur.src = "arthur.jpg";
-var brandon = new Image();
-brandon.src = "brandon.jpg";
-var chris = new Image();
-chris.src = "chris.jpg";
-var dillon = new Image();
-dillon.src = "dillon.jpg";
-var evan = new Image();
-evan.src = "evan.jpg";
-var kosbie = new Image();
-kosbie.src = "koz.jpg";
-var tomer = new Image();
-tomer.src = "tomer.jpg";
-var images = {
-  arthur: arthur,
-  brandon: brandon,
-  chris: chris,
-  dillon: dillon,
-  evan: evan,
-  kosbie: kosbie,
-  tomer: tomer
-}
+
 
 var Game = function() {
   g['canvas'] = document.getElementById('myCanvas');
@@ -264,7 +244,29 @@ var removeBlocks = function(x, y, nD1, nD2, dir, doubleCount) {
 
 /** Sprite loader. */
 var loadImgs = function() {
-
+  var arthur = new Image();
+  arthur.src = "arthur.jpg";
+  var brandon = new Image();
+  brandon.src = "brandon.jpg";
+  var chris = new Image();
+  chris.src = "chris.jpg";
+  var dillon = new Image();
+  dillon.src = "dillon.jpg";
+  var evan = new Image();
+  evan.src = "evan.jpg";
+  var kosbie = new Image();
+  kosbie.src = "koz.jpg";
+  var tomer = new Image();
+  tomer.src = "tomer.jpg";
+  g['images'] = {
+    'arthur': arthur,
+    'brandon': brandon,
+    'chris': chris,
+    'dillon': dillon,
+    'evan': evan,
+    'kosbie': kosbie,
+    'tomer': tomer
+  }
 }
 
 /** Fill in blocks. */
@@ -539,6 +541,7 @@ var drawBoxes = function() {
   var i, j, k, l;
   var drawLeft, drawTop, drawWidth, drawHeight;
   var transformed = false;
+  var clicked = false;
   var removeFrac;
   //var flattenedToRemove = flatten(g['toRemove']);//removed for simultaneous animation
 
@@ -551,6 +554,7 @@ var drawBoxes = function() {
 
       for (k = 0; k < g['clicked'].length; k++) {
         if ((g['clicked'][k].x === i) && (g['clicked'][k].y === j)) {
+          clicked = true;
           g['ctx'].fillStyle = '#FF6EC7';
           g['ctx'].fillRect(
             drawLeft,
@@ -593,6 +597,15 @@ var drawBoxes = function() {
           drawWidth * removeFrac,
           drawHeight * removeFrac
         );
+
+        g['ctx'].drawImage(
+        g['images'][g['board'][i][j]['icon']],
+        ((-g['squareW'] / 2) + (g['squareW'] / 6)) * removeFrac,
+        ((-g['squareH'] / 2) + (g['squareH'] / 6)) * removeFrac,
+        ((2 * drawWidth) / 3) * removeFrac,
+        ((2 * drawHeight) / 3) * removeFrac
+        );
+
         g['ctx'].restore();
         transformed = false;
       } else {
@@ -602,16 +615,20 @@ var drawBoxes = function() {
           drawWidth,
           drawHeight
         );
+        if(!clicked){
+          g['ctx'].drawImage(
+          g['images'][g['board'][i][j]['icon']],
+          drawLeft + (g['squareW'] / 6),
+          drawTop + (g['squareH'] / 6),
+          (2 * drawWidth) / 3,
+          (2 * drawHeight) / 3
+          );
+        }else{
+          clicked = false;
+        }
       }
 
-      // Draw face
-      g['ctx'].drawImage(
-        images[g['board'][i][j]['icon']],
-        drawLeft + (g['squareW'] / 6),
-        drawTop + (g['squareH'] / 6),
-        (2 * g['squareW']) / 3,
-        (2 * g['squareH']) / 3
-      )
+      
     }
   }
 }
