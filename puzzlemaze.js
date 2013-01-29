@@ -4,14 +4,16 @@ g['boardH'] = 15;
 g['INTERVAL'] = 1000 / 60;
 g['REMOVE_TIME'] = 50;
 g['N_ROT_DEGREES'] = 180;
-g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris'];
+// TODO: Add Liz?
+g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris', 'kosbie'];
 g['colorMap'] = {
   'evan' : 'green',
   'tomer' : 'blue',
   'brandon' : 'red',
   'dillon' : 'yellow',
   'arthur' : 'orange',
-  'chris' : 'cyan'
+  'chris' : 'cyan',
+  'kosbie' : 'black'
   // TODO: Lol there are more TAs...
   //yea these are the only ones i could remember
 };
@@ -246,6 +248,8 @@ var initBoard = function() {
   for (var col = 0; col < g['boardW']; col++) {
      addBlocksToColumn(col, g['boardH']);
   }
+  // Force the top-left to start as Kosbie
+  g['board'][0][0] = new Block(['kosbie']);
 }
 
 /**
@@ -300,12 +304,12 @@ var addBlocksToColumn = function(col, numBlocks) {
       banned.push(getIcon(col, row - 1));
     }
 
-
-    g['icons'].forEach(function(icon) {
-      if (banned.indexOf(icon) === -1) {
-        choices.push(icon)
+    // Consider all non-banned options except Kosbie.
+    for (var i = 0; i < g['icons'].length - 1; i++) {
+      if (banned.indexOf(g['icons'][i]) === -1) {
+        choices.push(g['icons'][i]);
       }
-    })
+    }
 
     g['board'][col][row] = new Block(choices);
     banned = [];
@@ -355,11 +359,12 @@ var addBlocksToRow = function(row, numBlocks) {
       banned.push(getIcon(col, row + 1));
     }
 
-    g['icons'].forEach(function(icon) {
-      if (banned.indexOf(icon) === -1) {
-        choices.push(icon)
+    // Consider all non-banned options except Kosbie.
+    for (var i = 0; i < g['icons'].length - 1; i++) {
+      if (banned.indexOf(g['icons'][i]) === -1) {
+        choices.push(g['icons'][i]);
       }
-    })
+    }
 
     g['board'][col][row] = new Block(choices);
     banned = [];
@@ -392,8 +397,9 @@ var checkRemove = function() {
       done.push(i);
     }
   }
-  if (done.length > 0)
-    alert(g['removeTimer'].length + ' ' + g['toRemove'].length);
+  if (done.length > 0) {
+    //alert(g['removeTimer'].length + ' ' + g['toRemove'].length);
+  }
 
   for (i = 0; i < done.length; i++){
     g['removeTimer'].splice(done[i], 1);
@@ -571,7 +577,7 @@ var drawBoxes = function() {
           drawTop,
           drawWidth,
           drawHeight
-          );
+        );
       }
     }
   }
