@@ -1,6 +1,6 @@
 var g = { };
-g['boardW'] = 10;
-g['boardH'] = 15;
+g['boardW'] = 8;
+g['boardH'] = 12;
 g['INTERVAL'] = 1000 / 60;
 g['REMOVE_TIME'] = 50;
 g['N_ROT_DEGREES'] = 180;
@@ -28,6 +28,30 @@ g['toRemove'] = [];
 g['removeTimer'] = [];
 /** Array of messages to be displayed to user on board. */
 g['displayMessages'] = [];
+
+var arthur = new Image();
+arthur.src = "arthur.jpg";
+var brandon = new Image();
+brandon.src = "brandon.jpg";
+var chris = new Image();
+chris.src = "chris.jpg";
+var dillon = new Image();
+dillon.src = "dillon.jpg";
+var evan = new Image();
+evan.src = "evan.jpg";
+var kosbie = new Image();
+kosbie.src = "koz.jpg";
+var tomer = new Image();
+tomer.src = "tomer.jpg";
+var images = {
+  arthur: arthur,
+  brandon: brandon,
+  chris: chris,
+  dillon: dillon,
+  evan: evan,
+  kosbie: kosbie,
+  tomer: tomer
+}
 
 var Game = function() {
   g['canvas'] = document.getElementById('myCanvas');
@@ -533,7 +557,7 @@ var drawBoxes = function() {
             drawTop,
             drawWidth,
             drawHeight
-            );
+          );
 
           drawLeft = i * g['squareW'] + g['squareW'] / 4;
           drawTop = j * g['squareH'] + g['squareH'] / 4;
@@ -551,10 +575,10 @@ var drawBoxes = function() {
             g['ctx'].translate(
               drawLeft + g['squareW'] / 2,
               drawTop + g['squareH'] / 2
-              );
+            );
             g['ctx'].rotate(
               (removeFrac * g['N_ROT_DEGREES']) * (Math.PI / 180)
-              );
+            );
             break;
           }
         }
@@ -568,7 +592,7 @@ var drawBoxes = function() {
           (-g['squareH'] / 2) * removeFrac,
           drawWidth * removeFrac,
           drawHeight * removeFrac
-          );
+        );
         g['ctx'].restore();
         transformed = false;
       } else {
@@ -579,6 +603,15 @@ var drawBoxes = function() {
           drawHeight
         );
       }
+
+      // Draw face
+      g['ctx'].drawImage(
+        images[g['board'][i][j]['icon']],
+        drawLeft + (g['squareW'] / 6),
+        drawTop + (g['squareH'] / 6),
+        (2 * g['squareW']) / 3,
+        (2 * g['squareH']) / 3
+      )
     }
   }
 }
