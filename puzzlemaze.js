@@ -555,7 +555,6 @@ var getBottommostCoord = function(blocks) {
 /**
  * Remove each array of blocks in toRemove, shift the respective row or column
  * over, then replace the missing blocks.
- * TODO: OMER: Rewrite to take an index and remove only the blocks in g['toRemove'][index]
  */
 var removeShiftAndReplace = function(i) {
   var numBlocks;
