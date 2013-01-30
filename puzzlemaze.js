@@ -6,6 +6,7 @@ g['REMOVE_TIME'] = 50;
 g['timer'] = 0;
 g['N_ROT_DEGREES'] = 180;
 g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris', 'liz', 'kosbie'];
+g['icons'].splice(Math.floor(Math.random() * 6), 1);
 g['colorMap'] = {
   'evan' : 'green',
   'tomer' : 'blue',
