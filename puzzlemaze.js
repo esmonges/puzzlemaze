@@ -62,8 +62,24 @@ var Game = function() {
 
   setInterval(update, g['INTERVAL']);
 
+  var onKeyDown = function(event) {
+    console.log('hi');
+    if (event.keyCode === 82) {
+      for (var i = 0; i < g['boardW']; i++) {
+        for (var j = 0; j < g['boardH']; j++) {
+          g['board'][i][j] = undefined;
+        }
+      }
+    }
+    initBoard();
+  }
+
+  g['canvas'].addEventListener('keydown', onKeyDown, false);
   g['canvas'].addEventListener('mousedown', onMouseDown, false);
   g['canvas'].addEventListener('mouseup', onMouseUp, false);
+
+  g['canvas'].setAttribute('tabindex','0');
+  g['canvas'].focus();
 }
 
 var onMouseDown = function(event) {
