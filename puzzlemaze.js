@@ -210,8 +210,8 @@ var swapBlocks = function() {
   var x1, y1, x2, y2;
 
   if (g['clicked'].length === 2) {
-    if ((isZZZ(x1, y1) && isKosbieAndAdjacentToZZZ(x2, y2)) ||
-        (isZZZ(x2, y2) && isKosbieAndAdjacentToZZZ(x1, y1))) {
+    if ((isZZZ(x1, y1) && isAdjacentToZZZ(x2, y2)) ||
+        (isZZZ(x2, y2) && isAdjacentToZZZ(x1, y1))) {
       console.log('hey');
       g['gameover'] = true;
     } else if (isZZZ(x1, y1) || isZZZ(x2, y2)) {
