@@ -23,6 +23,7 @@ g['colorMap'] = {
   'liz' : 'red',
   'kosbie' : 'black'
 };
+g['gameover'] = false;
 
 /** Whether the mouse is down or not. */
 g['mouseDown'] = false;
@@ -152,7 +153,8 @@ var swapBlocks = function() {
   if (g['clicked'].length === 2) {
     if ((isZZZ(x1, y1) && isKosbieAndAdjacentToZZZ(x2, y2)) ||
         (isZZZ(x2, y2) && isKosbieAndAdjacentToZZZ(x1, y1))) {
-      // TODO: YOU WIN!
+      console.log('hey');
+      g['gameover'] = true;
     } else if (isZZZ(x1, y1) || isZZZ(x2, y2)) {
       // Can't swap with Zs
       if (x1 >= g['boardW'] - 2 && y1 >= g['boardH'] - 2) {
@@ -339,6 +341,9 @@ var loadImgs = function() {
     'tomer': tomer,
     'goal': goal
   }
+
+  g['gameoverImage'] = new Image();
+  g['gameoverImage'].src = "gameover.png";
 }
 
 /** Fill in blocks. */
@@ -349,8 +354,6 @@ var initBoard = function() {
   // Force the top-left to start as Kosbie
   g['board'][0][0] = new Block(['kosbie']);
   // Force the bottom-right corner to be Zs
-  // TODO: Disallow swapping with Zs
-  // /*
   g['board'][g['boardW'] - 2][g['boardH'] - 2] = new Block(['goal']);
   g['board'][g['boardW'] - 2][g['boardH'] - 1] = new Block(['goal']);
   g['board'][g['boardW'] - 1][g['boardH'] - 2] = new Block(['goal']);
@@ -492,9 +495,18 @@ var Block = function(choices) {
 
 /** Function to execute at each interval. */
 var update = function() {
-  checkRemove();
-  draw();
-  g['timer']++;
+  if (!g['gameover']) {
+    checkRemove();
+    draw();
+    g['timer']++;
+  } else {
+    console.log('hey');
+    g['canvas'].drawImage(
+      g['gameoverImage'],
+      50,
+      50
+    );
+  }
 }
 
 /** Handle removal timer and refilling board. */
@@ -671,12 +683,11 @@ var drawBoxes = function() {
         }
       }
 
- 
       for (k = 0; k < g['toRemove'].length; k++) {
         for (l = 0; l < g['toRemove'][k].length; l++) {
           //console.log("remove");
           if ((g['toRemove'][k][l].x === i) && (g['toRemove'][k][l].y === j)) {
-            
+
             transformed = true;
             removeFrac = (g['removeTimer'][k] / g['REMOVE_TIME']);
             g['ctx'].save();
