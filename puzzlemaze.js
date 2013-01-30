@@ -43,10 +43,10 @@ g['bed'] = new Image();
 g['bed'].src = "cartoon-bed.gif"; // nezta.com
 
 I['click'] = false;
-I['nSlides'] = 7;
+I['nSlides'] = 6;
 I['slideN'] = 0;
 I['timeID'];
-I['slides'];
+I['slides'] = {};
 
 var Instructions = function(){
   var currSlide = 0;
@@ -69,19 +69,39 @@ var Instructions = function(){
 
 var drawSlides = function(){
 
+  g['ctx'].fillStyle = 'white';
+  g['ctx'].fillRect(0, 0, g['canvasW'], g['canvasH']);
+
+
+
 
   if(I['click']){
     I['click'] = false;
     I['slideN']++;
   }
-  if(I['slideN'] > I['nSlides']){
+  if(I['slideN'] >= I['nSlides']){
     window.clearInterval(I['timeID']);
     new Game();
+    return;
   }
+
+  g['ctx'].drawImage(
+    I['slides'][I['slideN']],
+     0, 0,
+     g['canvasW'],
+     g['canvasH']);
 }
 
 var loadSlides = function(){
-  for(var i = 0; i < )//TODO
+  for(var i = 0; i < I['nSlides']; i++){
+    I['slides'][i] = new Image();
+  }
+  I['slides'][0].src = "instr1.png";
+  I['slides'][1].src = "instr2.png";
+  I['slides'][2].src = "instr3.png";
+  I['slides'][3].src = "instr4.png";
+  I['slides'][4].src = "instr5.png";
+  I['slides'][5].src = "instr6.png";
 }
 
 var Game = function() {
