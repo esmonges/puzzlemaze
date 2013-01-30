@@ -1,3 +1,10 @@
+/**
+ * 15-237 Project #1
+ * Omer Zach          ozach
+ * Edward Smongeski   esmonges
+ *
+ */
+
 var g = { };
 g['boardW'] = 8;
 g['boardH'] = 12;
