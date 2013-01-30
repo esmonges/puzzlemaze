@@ -1,0 +1,34 @@
+15-237 Project #1
+Omer Zach          ozach
+Edward Smongeski   esmonges
+
+Instructions:
+- Professor Kosbie hasn’t slept in days!
+
+- Your mission is to help him get through this puzzling maze of TAs to his
+  peaceful bed.
+
+- To help Kosbie make it through the maze, you can click on a TA like Tomer’s
+  face to highlight them.
+
+- We want Tomer to form a row of three or more Tomer’s. After highlighting
+  Tomer, if swapping Tomer with one of his neighbors, like Brandon, forms a row
+  of three Tomers, you can click on that neighbor to swap them. Then all three
+  Tomers disappear!
+
+- With a poof, the three Tomer’s are gone. The course staff above the row of
+  Tomers drop down and are replaced by more TAs from above.
+
+- If the three Tomers had instead been in a horizontal row, the course staff
+  would have slid to the right and been replaced by more TAs from the left.
+
+- You will clear away TAs along the rows and column Professor Kosbie’s occupies,
+  gradually bringing him down and to the right, until he reaches his bed!
+
+
+Core Week 1 Ideas:
+- Images of Professor Kosbie and each TA are included. We rotate images of
+  Professor Kosbie's face with a speech bubble showing his need to get some
+  rest.
+- We of course use JavaScript and Canvas to put this all together. We use
+  functions as variables, as well as arrays and objects.
