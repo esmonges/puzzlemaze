@@ -6,6 +6,7 @@
  */
 
 var g = { };
+var I = { };
 g['boardW'] = 8;
 g['boardH'] = 12;
 g['INTERVAL'] = 1000 / 60;
@@ -41,13 +42,51 @@ g['images'] = [];
 g['bed'] = new Image();
 g['bed'].src = "cartoon-bed.gif"; // nezta.com
 
-var Game = function() {
+I['click'] = false;
+I['nSlides'] = 7;
+I['slideN'] = 0;
+I['timeID'];
+I['slides'];
+
+var Instructions = function(){
+  var currSlide = 0;
+  var eventId;
+
   g['canvas'] = document.getElementById('myCanvas');
   g['canvasW'] = g['canvas'].width;
   g['canvasH'] = g['canvas'].height;
   g['squareW'] = Math.round(g['canvasW'] / g['boardW']);
   g['squareH'] = Math.round(g['canvasH'] / g['boardH']);
   g['ctx'] = g['canvas'].getContext('2d');
+
+  g['canvas'].addEventListener('mousedown', function(){
+    I['click'] = true;
+  })
+
+  loadSlides();
+  I['timeID'] = setInterval(drawSlides, g['INTERVAL']);
+}
+
+var drawSlides = function(){
+
+
+  if(I['click']){
+    I['click'] = false;
+    I['slideN']++;
+  }
+  if(I['slideN'] > I['nSlides']){
+    window.clearInterval(I['timeID']);
+    new Game();
+  }
+}
+
+var loadSlides = function(){
+  for(var i = 0; i < )//TODO
+}
+
+var Game = function() {
+
+  
 
 
   g['icons'].splice(Math.floor(Math.random() * 6), 1);
@@ -772,5 +811,5 @@ var drawMessages = function() {
 
 }
 
-new Game();
+new Instructions();
 
