@@ -13,7 +13,6 @@ g['REMOVE_TIME'] = 50;
 g['timer'] = 0;
 g['N_ROT_DEGREES'] = 180;
 g['icons'] = ['evan', 'tomer', 'brandon', 'dillon', 'arthur', 'chris', 'liz', 'kosbie'];
-g['icons'].splice(Math.floor(Math.random() * 6), 1);
 g['colorMap'] = {
   'evan' : 'green',
   'tomer' : 'blue',
@@ -48,6 +47,9 @@ var Game = function() {
   g['squareW'] = Math.round(g['canvasW'] / g['boardW']);
   g['squareH'] = Math.round(g['canvasH'] / g['boardH']);
   g['ctx'] = g['canvas'].getContext('2d');
+
+
+  g['icons'].splice(Math.floor(Math.random() * 6), 1);
 
   /* Board will mimic canvas layout, with origin at left-top, [x][y] corresponds
    * x indices right of of the origin, and y indices down from the origin. */
@@ -92,6 +94,11 @@ var onMouseUp = function(event) {
 
   var xInd = Math.floor(canvasX / g['squareW']);
   var yInd = Math.floor(canvasY / g['squareH']);
+
+  if(g['toRemove'].length > 0){
+    g['mouseDown'] = false;
+    return;
+  }
 
   if (xInd === g['boardW']) {
     xInd--;
@@ -492,17 +499,26 @@ var update = function() {
 
 /** Handle removal timer and refilling board. */
 var checkRemove = function() {
-  while (g['removeTimer'].length > 0) {
+  //while (g['removeTimer'].length > 0) {
+    var removeInds = [];
     for (var i = 0; i < g['removeTimer'].length; i++) {
-      if (g['removeTimer'][i] > 0) {
+      if (g['removeTimer'][i] != 0) {
+        if(g['removeTimer'][i] < 0){
+          removeInds.push(i);
+        }
+ // console.log(g['removeTimer'][0]);
         g['removeTimer'][i]--;
-      } else {
+      } else{
         removeShiftAndReplace(i);
-        g['removeTimer'].splice(i, 1);
-        g['toRemove'].splice(i, 1);
+        removeInds.push(i);
+        g['removeTimer'][i]--;
       }
     }
-  }
+    for(var i = 0; i < removeInds.length; i++){
+      g['removeTimer'].splice(removeInds[i], 1);
+      g['toRemove'].splice(removeInds[i], 1);
+    }
+  //}
 }
 
 /** TODO: Documentation. */
@@ -656,9 +672,12 @@ var drawBoxes = function() {
         }
       }
 
+ 
       for (k = 0; k < g['toRemove'].length; k++) {
         for (l = 0; l < g['toRemove'][k].length; l++) {
+          //console.log("remove");
           if ((g['toRemove'][k][l].x === i) && (g['toRemove'][k][l].y === j)) {
+            
             transformed = true;
             removeFrac = (g['removeTimer'][k] / g['REMOVE_TIME']);
             g['ctx'].save();
